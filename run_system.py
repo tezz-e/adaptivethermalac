@@ -37,7 +37,7 @@ def main():
 
     print("\n==================================================================")
     print("  ADAPTIVE THERMAL COMFORT ADVISORY & CONTROL SYSTEM")
-    print("  BTech First Year Project - Campus Hostels")
+    print("  IoT Switch Actuation & Control System")
     print("==================================================================\n")
 
     processes = []

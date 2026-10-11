@@ -1,6 +1,6 @@
 # Project Review & Viva Q&A Guide
 ### Adaptive Thermal Comfort AC Controller for Campus Hostels
-**Course:** BTech First Year Engineering Project
+**Project Type:** IoT Adaptive Thermal Comfort Advisory & Control System
 
 ---
 

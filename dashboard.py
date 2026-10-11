@@ -189,7 +189,7 @@ with st.sidebar:
         st.success(f"Decision: AC is {ac_state} (Servo: {servo_angle}°)")
         st.rerun()
 
-    st.caption("BTech First Year Project — Hostel AC Adaptive Thermal Comfort")
+    st.caption("Adaptive Thermal Comfort — Hostel AC Control System")
 
 # --------------------------------------------------------------------------------------
 # 4. MAIN NOTION HEADER

@@ -1,5 +1,5 @@
 # Adaptive Thermal Comfort AC Controller for Hostels
-### BTech First Year Engineering Project
+### IoT Switch Actuation & ASHRAE 55 Adaptive Comfort System
 
 > **A closed-loop physical IoT system:**
 > An ESP32 microcontroller with a DHT11 sensor monitors hostel room temperatures and mechanically actuates an **SG90 micro servo motor** to flip the physical AC rocker switch ON or OFF based on the **ASHRAE 55 Adaptive Comfort Model**, compensating for nighttime sleep metabolism and blanket insulation.
