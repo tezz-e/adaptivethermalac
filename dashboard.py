@@ -23,27 +23,47 @@ from pathlib import Path
 # --------------------------------------------------------------------------------------
 # 1. PAGE SETUP & NOTION-STYLE CSS WITH ADVERA / SANS FONT
 # --------------------------------------------------------------------------------------
-def load_advera_font_css():
-    """Embeds Advera font as base64 WOFF2 for zero-flicker custom typography."""
-    font_path = Path("assets/fonts/Advera.woff2")
-    if not font_path.exists():
-        font_path = Path("E:/gfx/fonts/Advera.woff2")
-    if font_path.exists():
+def load_custom_fonts_css():
+    """Embeds modern sans-serif typography (Poppins / Helvetica) from assets or E:/gfx/fonts."""
+    css_rules = []
+    
+    # Poppins Regular
+    poppins_reg = Path("assets/fonts/Poppins-Regular.ttf")
+    if poppins_reg.exists():
         try:
-            with open(font_path, "rb") as f:
+            with open(poppins_reg, "rb") as f:
                 b64 = base64.b64encode(f.read()).decode("utf-8")
-            return f"""
-            @font-face {{
-                font-family: 'Advera';
-                src: url('data:font/woff2;base64,{b64}') format('woff2');
-                font-weight: 400;
-                font-style: normal;
-                font-display: swap;
-            }}
-            """
+                css_rules.append(f"""
+                @font-face {{
+                    font-family: 'Poppins';
+                    src: url('data:font/ttf;base64,{b64}') format('truetype');
+                    font-weight: 400;
+                    font-style: normal;
+                    font-display: swap;
+                }}
+                """)
         except Exception:
             pass
-    return ""
+
+    # Poppins SemiBold
+    poppins_bold = Path("assets/fonts/Poppins-SemiBold.ttf")
+    if poppins_bold.exists():
+        try:
+            with open(poppins_bold, "rb") as f:
+                b64 = base64.b64encode(f.read()).decode("utf-8")
+                css_rules.append(f"""
+                @font-face {{
+                    font-family: 'Poppins';
+                    src: url('data:font/ttf;base64,{b64}') format('truetype');
+                    font-weight: 600;
+                    font-style: normal;
+                    font-display: swap;
+                }}
+                """)
+        except Exception:
+            pass
+
+    return "\n".join(css_rules)
 
 st.set_page_config(
     page_title="Hostel AC Thermal Comfort System",
@@ -55,14 +75,15 @@ st.set_page_config(
 st.markdown(
     f"""
     <style>
-    {load_advera_font_css()}
+    {load_custom_fonts_css()}
 
     html, body, [class*="css"], [class*="st-"], .stApp, .stMarkdown, p, div, span, label, button, input, textarea, select {{
-        font-family: 'Advera', 'Helvetica Neue', 'Helvetica', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+        font-family: 'Poppins', 'Helvetica Neue', 'Helvetica', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
     }}
 
     h1, h2, h3, h4, h5, h6 {{
-        font-family: 'Advera', 'Helvetica Neue', 'Helvetica', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+        font-family: 'Poppins', 'Helvetica Neue', 'Helvetica', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+        font-weight: 600;
         letter-spacing: -0.01em;
     }}
 
@@ -379,7 +400,7 @@ with tab_hostel:
             plot_bgcolor="rgba(0,0,0,0)",
             height=330,
             margin=dict(l=20, r=20, t=25, b=20),
-            font=dict(family="Advera, 'Helvetica Neue', Helvetica, sans-serif", color="#CBD5E1", size=12),
+            font=dict(family="Poppins, 'Helvetica Neue', Helvetica, sans-serif", color="#CBD5E1", size=12),
             legend=dict(
                 orientation="h",
                 yanchor="bottom",
