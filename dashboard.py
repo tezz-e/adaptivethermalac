@@ -485,12 +485,12 @@ with tab_specs:
     st.table(syllabus_mapping)
 
     st.divider()
-    st.markdown("### 👥 Team Division of Work")
-    team_data = pd.DataFrame([
-        {"Member": "Jalak Vijay Hadvani (Coordinator)", "Responsibility": "ASHRAE Adaptive Comfort Model implementation & overall integration"},
-        {"Member": "Priyamvadha H L", "Responsibility": "Weather API integration and outdoor data pipeline"},
-        {"Member": "Itla Naveen Shiv Shankar", "Responsibility": "Diurnal sleep profile modeling & overnight hostel energy savings analysis"},
-        {"Member": "Maneet Singh", "Responsibility": "Dashboard (Streamlit/Plotly) & hardware unit: ESP32 firmware, sensor + servo integration"},
-        {"Member": "Smyan Ojha", "Responsibility": "Testing, edge-case handling, documentation and presentation"}
+    st.markdown("### 🛠️ Subsystem Architecture & Responsibilities")
+    roles_data = pd.DataFrame([
+        {"Subsystem": "Comfort Modeling Lead", "Responsibility": "ASHRAE Adaptive Comfort Model implementation & hysteresis decision logic"},
+        {"Subsystem": "Weather Pipeline Lead", "Responsibility": "Open-Meteo REST API integration, data acquisition, and offline fallback"},
+        {"Subsystem": "Thermal Analytics Lead", "Responsibility": "Diurnal sleep profile modeling & run-time reduction analysis"},
+        {"Subsystem": "Full-Stack & Hardware Lead", "Responsibility": "Streamlit Notion UI, Flask API, ESP32 firmware & SG90 servo switch actuation"},
+        {"Subsystem": "Testing & Storage Lead", "Responsibility": "CSV storage pipeline with 'with open', 7 automated unit tests, and edge-case handling"}
     ])
-    st.table(team_data)
+    st.table(roles_data)

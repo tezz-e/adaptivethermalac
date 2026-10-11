@@ -2,7 +2,6 @@
  * ======================================================================================
  * Project: Adaptive Thermal Comfort Advisory & Control System for Campus Hostels
  * Component: ESP32 Firmware for Hostel AC Physical Control Unit
- * Authors: Maneet Singh, Jalak Vijay Hadvani, Priyamvadha H L, Itla Naveen, Smyan Ojha
  * 
  * Hardware Setup:
  * - ESP32 NodeMCU / DevKit V1

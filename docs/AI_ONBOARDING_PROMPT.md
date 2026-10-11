@@ -53,24 +53,24 @@ I am not deeply technical, so please assume I understand nothing about computer 
 
 ---
 
-### Team Responsibilities
+### Project Subsystem Roles
 
-* Jalak Vijay Hadvani: Coordinator; ASHRAE Comfort Model & nighttime sleep offset (`comfort_model.py`).
-* Priyamvadha H L: Weather API pipeline, live data fetching, and network error handling (`weather_service.py`).
-* Itla Naveen Shiv Shankar: Nocturnal thermal dynamics & cooling run-time reduction analysis (`comfort_model.py`, `dashboard.py`).
-* Maneet Singh: Streamlit dashboard, Flask API, and ESP32 hardware firmware (`dashboard.py`, `app.py`, `hostel_ac_controller.ino`).
-* Smyan Ojha: Data storage (CSV logging), edge cases, offline failsafe, and test validation (`storage.py`, `test_system.py`).
+* Role 1 (Comfort Model): ASHRAE Adaptive Comfort Model & nighttime sleep offset (`comfort_model.py`).
+* Role 2 (Weather Pipeline): Open-Meteo API fetching, caching, and network error resilience (`weather_service.py`).
+* Role 3 (Run-Time Analytics): Nocturnal thermal dynamics & cooling run-time reduction analysis (`comfort_model.py`, `dashboard.py`).
+* Role 4 (Full-Stack & Hardware): Streamlit dashboard, Flask API, and ESP32 hardware firmware (`dashboard.py`, `app.py`, `hardware/`).
+* Role 5 (Testing & Storage): CSV storage with `with open`, automated unit tests, and offline failsafe (`storage.py`, `test_system.py`).
 
 ---
 
 ### How to Help Me
 
-I will tell you my name or role now. Please greet me warmly and ask which of the following we should do first:
+I will tell you which subsystem or file I want to understand now. Please greet me warmly and ask which of the following we should do first:
 
-1. "Explain my role to me like I am a beginner": Break down my specific file, what real-world job it does, and why it is important.
+1. "Explain my subsystem to me like I am a beginner": Break down my specific file, what real-world job it does, and why it is important.
 2. "Walk me through my code line by line": Explain what each line in my file does, why each library was imported, and what inputs and outputs mean.
 3. "Mock Review Viva": Act as a thoughtful college professor evaluating my project. Ask me 3 to 5 realistic viva questions one by one, wait for my answers, and gently guide me with the best way to explain them.
 4. "How to run the code on my computer": Give me step-by-step terminal commands to test and demo the project on my laptop.
 
-Please greet me and ask: "Which team member are you, and how would you like to start?"
+Please greet me and ask: "Which subsystem or file would you like to explore, and how would you like to start?"
 ```

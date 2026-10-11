@@ -266,47 +266,47 @@ A test script using Python's standard `unittest` library. Running `py test_syste
 
 ---
 
-## 6. Team Division of Work and Review Speaking Scripts
+## 6. Subsystem Roles and Review Speaking Scripts
 
-Here is who is responsible for each portion of the project, along with a clear speaking script for each team member during evaluation:
+Here is a breakdown of each technical area along with a clear speaking script for whoever presents that portion during evaluation:
 
 ---
 
-### Jalak Vijay Hadvani (Coordinator and Comfort Model)
-* Primary Responsibility: Comfort modeling and mathematical decision logic.
-* Your Primary File: `comfort_model.py`
+### Role 1: Comfort Modeling and Decision Logic
+* Primary Files: `comfort_model.py`
+* Core Concepts: ASHRAE Standard 55 adaptive comfort, nighttime sleep metabolism offset, thermostat hysteresis deadband.
 * What you say to the examiner:
   > "I implemented the ASHRAE Standard 55 Adaptive Comfort Model in `comfort_model.py`. The formula calculates optimal indoor comfort based on outdoor temperature: 17.8 plus 0.31 times outdoor temperature. I also implemented the diurnal sleep adjustment: when residents sleep, their metabolic heat production drops to 0.7 met and blanket insulation increases, so our code shifts the comfort target up by +1.0 degree Celsius to prevent overnight overcooling. Finally, I built the hysteresis logic so the AC maintains state within the comfort band and avoids rapid switch cycling."
 
 ---
 
-### Priyamvadha H L (Weather Pipeline and Data Acquisition)
-* Primary Responsibility: Meteorological data fetching and error handling.
-* Your Primary File: `weather_service.py`
+### Role 2: Weather Pipeline and Data Acquisition
+* Primary Files: `weather_service.py`
+* Core Concepts: Open-Meteo REST API, live data acquisition, 5-minute memory caching, network error resilience.
 * What you say to the examiner:
   > "I designed the outdoor weather data acquisition pipeline in `weather_service.py`. Our system connects to the Open-Meteo REST API using Python's `requests` library to fetch live outdoor temperature and humidity for our Vellore campus coordinates. Because outdoor weather changes slowly, I implemented a 5-minute memory check so we do not make unnecessary web requests on every 5-second sensor ping. I also implemented exception handling using `try...except` so that if the internet drops, the system falls back to safe backup numbers without interrupting hardware operation."
 
 ---
 
-### Itla Naveen Shiv Shankar (Overnight Run-Time Reduction and Comfort Analysis)
-* Primary Responsibility: Nocturnal thermal dynamics and performance metrics.
-* Your Primary Files: `comfort_model.py` and `dashboard.py`
+### Role 3: Run-Time Reduction and Thermal Analytics
+* Primary Files: `comfort_model.py` and `dashboard.py`
+* Core Concepts: Directly measured run-time reduction, overcooling degree-hours avoided, scientific scope boundaries.
 * What you say to the examiner:
   > "I analyzed the nocturnal thermal dynamics and cooling run-time reduction. Because our campus hostel cooling is connected to a central institutional system, we do not guess backend chiller tonnage or compressor wattage without instrumentation. Instead, we directly measure physical room temperature and track active cooling run-time. Unregulated, the AC runs for 8 continuous hours overnight, plunging rooms below 19 degrees. Our automated system turns the switch off once comfortable, reducing active cooling run-time by roughly 50 percent and preventing 16 degree-hours of severe overcooling."
 
 ---
 
-### Maneet Singh (Dashboard and Hardware Integration)
-* Primary Responsibility: User interface, API server, and ESP32 firmware.
-* Your Primary Files: `dashboard.py`, `app.py`, and `hardware/hostel_ac_controller/hostel_ac_controller.ino`
+### Role 4: Dashboard, REST API and Hardware Integration
+* Primary Files: `dashboard.py`, `app.py`, and `hardware/hostel_ac_controller/hostel_ac_controller.ino`
+* Core Concepts: Streamlit Notion UI, resident preferred setpoints, Flask REST API endpoints, ESP32 firmware, SG90 servo motor.
 * What you say to the examiner:
   > "I developed the Notion-style Streamlit dashboard and integrated the hardware unit. I built the Flask REST API in `app.py` that receives telemetry from the ESP32 and allows residents to set their preferred target temperature. On the hardware side, I wrote the Arduino firmware for the ESP32 DevKit, reading the DHT11 sensor and driving the SG90 micro servo motor to mechanically actuate the physical AC rocker switch. This non-invasive design allows automated control without tampering with high-voltage 230-volt mains wiring."
 
 ---
 
-### Smyan Ojha (Testing, Storage and Failsafe Validation)
-* Primary Responsibility: Data persistence, edge cases, and automated validation.
-* Your Primary Files: `storage.py` and `test_system.py`
+### Role 5: Testing, Data Storage and Failsafe Validation
+* Primary Files: `storage.py` and `test_system.py`
+* Core Concepts: CSV logging with `with open` context managers, 7-step unit testing, ESP32 autonomous offline failsafe.
 * What you say to the examiner:
   > "I handled data persistence, edge-case safety, and automated test validation. I implemented the CSV logging pipeline in `storage.py` using Python context managers (`with open`) to ensure telemetry records are saved safely without corruption. I also built `test_system.py`, which validates our mathematical formulas, hysteresis decisions, and API responses across 7 automated unit tests. In addition, I verified the ESP32 offline failsafe so that if network connectivity drops overnight, the microcontroller continues operating safely using internal autonomous thresholds."
 

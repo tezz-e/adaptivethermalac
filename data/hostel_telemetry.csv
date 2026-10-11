@@ -31,3 +31,5 @@ timestamp,room_id,current_temp,current_humidity,target_optimal,comfort_min,comfo
 2026-10-11 11:25:24,HOSTEL_D_312,23.0,50.0,25.0,23.5,26.5,OFF,0,Room temp (23.0°C) reached lower comfort limit (23.5°C). AC switched OFF to prevent overcooling.
 2026-10-11 10:00:00,TEST_ROOM,24.0,50.0,26.0,24.5,27.5,OFF,0,Test write
 2026-10-11 11:47:23,HOSTEL_D_312,23.0,50.0,25.0,23.5,26.5,OFF,0,Room temp (23.0°C) reached lower comfort limit (23.5°C). AC switched OFF to prevent overcooling.
+2026-10-11 10:00:00,TEST_ROOM,24.0,50.0,26.0,24.5,27.5,OFF,0,Test write
+2026-10-11 11:57:08,HOSTEL_D_312,23.0,50.0,25.0,23.5,26.5,OFF,0,Room temp (23.0°C) reached lower comfort limit (23.5°C). AC switched OFF to prevent overcooling.

@@ -1,29 +1,31 @@
 # Adaptive Thermal Comfort AC Controller for Hostels
 ### BTech First Year Engineering Project | Vellore Campus
-**Team:** Maneet Singh, Jalak Vijay Hadvani, Priyamvadha H L, Itla Naveen Shiv Shankar, Smyan Ojha
+
+> **A closed-loop physical IoT system:**
+> An ESP32 microcontroller with a DHT11 sensor monitors hostel room temperatures and mechanically actuates an **SG90 micro servo motor** to flip the physical AC rocker switch ON or OFF based on the **ASHRAE 55 Adaptive Comfort Model**, compensating for nighttime sleep metabolism and blanket insulation.
 
 ---
 
-## Welcome Teammates: Start Here!
+## Getting Started: Start Here!
 
 If you are opening this repository for the first time, do not worry if you have never built an IoT device or worked with backend servers before. Everything in this project has been built using **simple, beginner-friendly Python** (only basic functions, dictionaries, and lists — zero complex classes or OOP).
 
-Follow this 3-step preparation guide to get up to speed in 15 minutes:
+Follow this 3-step guide to get up to speed in 15 minutes:
 
 ### Step 1: Read the Plain-English Walkthrough (10 Minutes)
 Open [**docs/TEAM_WALKTHROUGH.md**](docs/TEAM_WALKTHROUGH.md).  
-Written like an experienced engineer explaining things to a kid, it walks you through:
+Written like an experienced engineer explaining things to a beginner, it walks you through:
 * The real physical problem: hostel rooms freezing down to 19°C overnight because wall switches lack thermostats.
 * Why we do not tackle classrooms (knowing what not to measure when you lack sensors).
 * What every single file in the project does and why libraries like `requests` and `flask` are imported.
 * What ASHRAE means and why we use it.
-* Your exact role and speaking script for the review evaluation.
+* Exact review speaking scripts for each part of the project.
 
 ### Step 2: Practice with Your 1-on-1 AI Tutor (5 Minutes)
 Open [**docs/AI_ONBOARDING_PROMPT.md**](docs/AI_ONBOARDING_PROMPT.md).  
 Copy that entire text and paste it into ChatGPT, Claude, or Gemini. The prompt instructs the AI to:
 * Act like a patient mentor who assumes you know nothing about programming.
-* Explain your specific file to you line by line.
+* Explain any specific file to you line by line.
 * Conduct a friendly mock viva review with 3 to 5 realistic questions.
 
 ### Step 3: Review Expected Viva Questions
@@ -32,17 +34,18 @@ Contains answers and diagrams for 13 common questions professors ask (hysteresis
 
 ---
 
-## Team Division of Work: Who Does What
+## Subsystems & Architecture Overview
 
-Find your name below to see your assigned file and key speaking points for the review:
+The system is organized into modular subsystems with clean separation of responsibilities:
 
-| Team Member | Primary File | What to Explain in the Review |
+| Subsystem / Area | Primary Files | Key Concepts & Architecture |
 | :--- | :--- | :--- |
-| **Jalak Vijay Hadvani (Coordinator)** | [`comfort_model.py`](comfort_model.py) | **ASHRAE Standard 55 & Decision Logic:** Explain the linear formula `17.8 + 0.31 * outdoor`, the +1.0°C night sleep offset for blankets, and the thermostat hysteresis deadband that prevents switch chatter. |
-| **Priyamvadha H L** | [`weather_service.py`](weather_service.py) | **Live Weather Pipeline:** Explain how Python's `requests` library calls Open-Meteo for Vellore weather, how the 5-minute memory cache prevents API spamming, and how `try...except` handles internet drops. |
-| **Itla Naveen Shiv Shankar** | [`comfort_model.py`](comfort_model.py), [`dashboard.py`](dashboard.py) | **Run-Time Reduction & Metrics:** Explain why we do not guess chiller tonnage, how our system directly measures temperature and cuts active cooling time by ~50% overnight, preventing 16 degree-hours of overcooling. |
-| **Maneet Singh** | [`dashboard.py`](dashboard.py), [`app.py`](app.py), [`hardware/`](hardware/) | **Dashboard, API & Hardware:** Explain the Streamlit Notion dashboard, the resident preference slider, the Flask REST API, the ESP32 Arduino firmware, and how the SG90 servo motor flips the physical wall switch safely. |
-| **Smyan Ojha** | [`storage.py`](storage.py), [`test_system.py`](test_system.py) | **Data Storage, Testing & Failsafe:** Explain CSV logging using `with open`, the 7 automated unit tests in `test_system.py`, and how the ESP32 offline failsafe protects residents if WiFi disconnects. |
+| **Comfort Model & Decision Logic** | [`comfort_model.py`](comfort_model.py) | **ASHRAE Standard 55 & Decision Logic:** Linear formula `17.8 + 0.31 * outdoor`, +1.0°C night sleep offset for blankets, and thermostat hysteresis deadband to prevent switch chatter. |
+| **Weather Pipeline** | [`weather_service.py`](weather_service.py) | **Live Meteorological Pipeline:** Open-Meteo REST API data fetching for Vellore coordinates, 5-minute memory cache to prevent API spamming, and `try...except` offline fallback. |
+| **Run-Time Analytics** | [`comfort_model.py`](comfort_model.py), [`dashboard.py`](dashboard.py) | **Cooling Run-Time Reduction:** Directly measured temperature dynamics cutting active cooling time by ~50% overnight, preventing 16 degree-hours of overcooling without guessing chiller tonnage. |
+| **Dashboard & Web API** | [`dashboard.py`](dashboard.py), [`app.py`](app.py) | **Presentation & Communication:** Streamlit Notion-style web dashboard, resident preference slider, and Flask REST API endpoints serving JSON decisions to the ESP32. |
+| **Hardware & Firmware** | [`hardware/`](hardware/) | **Embedded IoT Actuation:** ESP32 DevKit C++ firmware, DHT11 sensing on GPIO 4, and SG90 servo motor flipping the physical rocker switch safely without mains rewiring. |
+| **Data Persistence & Testing** | [`storage.py`](storage.py), [`test_system.py`](test_system.py) | **Storage & Quality Assurance:** CSV telemetry logging using `with open`, automated 7-step unit tests, and ESP32 offline failsafe. |
 
 ---
 

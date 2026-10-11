@@ -1,12 +1,10 @@
-# 🎓 Project Review & Viva Q&A Guide
+# Project Review & Viva Q&A Guide
 ### Adaptive Thermal Comfort AC Controller for Campus Hostels
-**Course:** BTech First Year Engineering Project  
-**Campus:** Vellore Campus  
-**Authors:** Maneet Singh, Jalak Vijay Hadvani, Priyamvadha H L, Itla Naveen Shiv Shankar, Smyan Ojha  
+**Course:** BTech First Year Engineering Project | Vellore Campus
 
 ---
 
-## 📑 Table of Contents
+## Table of Contents
 1. [Software Architecture & Syllabus-Aligned Design](#1-software-architecture--syllabus-aligned-design)
 2. [Scope Justification: Why Hostels Over Classrooms?](#2-scope-justification-why-hostels-over-classrooms)
 3. [Thermal Physics & ASHRAE Standard 55](#3-thermal-physics--ashrae-standard-55)
