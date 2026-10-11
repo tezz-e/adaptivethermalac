@@ -1,21 +1,56 @@
 # Adaptive Thermal Comfort AC Controller for Hostels
 ### BTech First Year Engineering Project | Vellore Campus
+**Team:** Maneet Singh, Jalak Vijay Hadvani, Priyamvadha H L, Itla Naveen Shiv Shankar, Smyan Ojha
 
-> **A closed-loop physical IoT system:**
-> An ESP32 microcontroller with a DHT11 sensor monitors hostel room temperatures and mechanically actuates an **SG90 micro servo motor** to flip the physical AC rocker switch ON or OFF based on the **ASHRAE 55 Adaptive Comfort Model**, compensating for nighttime sleep metabolism and blanket insulation.
+---
 
-> **Helpful Guides for the Team:**
-> * [**Team Walkthrough & Beginner Guide (`docs/TEAM_WALKTHROUGH.md`)**](docs/TEAM_WALKTHROUGH.md): Beginner-friendly explanation of every file, import, and role cheat sheets.
-> * [**AI Onboarding Prompt (`docs/AI_ONBOARDING_PROMPT.md`)**](docs/AI_ONBOARDING_PROMPT.md): Copy-paste prompt to have Claude/ChatGPT tutor any teammate one-on-one.
-> * [**Review & Viva Q&A Guide (`docs/PROJECT_VIVA_QA.md`)**](docs/PROJECT_VIVA_QA.md): Anticipated examiner questions, diagrams, and formula breakdowns.
+## Welcome Teammates: Start Here!
+
+If you are opening this repository for the first time, do not worry if you have never built an IoT device or worked with backend servers before. Everything in this project has been built using **simple, beginner-friendly Python** (only basic functions, dictionaries, and lists — zero complex classes or OOP).
+
+Follow this 3-step preparation guide to get up to speed in 15 minutes:
+
+### Step 1: Read the Plain-English Walkthrough (10 Minutes)
+Open [**docs/TEAM_WALKTHROUGH.md**](docs/TEAM_WALKTHROUGH.md).  
+Written like an experienced engineer explaining things to a kid, it walks you through:
+* The real physical problem: hostel rooms freezing down to 19°C overnight because wall switches lack thermostats.
+* Why we do not tackle classrooms (knowing what not to measure when you lack sensors).
+* What every single file in the project does and why libraries like `requests` and `flask` are imported.
+* What ASHRAE means and why we use it.
+* Your exact role and speaking script for the review evaluation.
+
+### Step 2: Practice with Your 1-on-1 AI Tutor (5 Minutes)
+Open [**docs/AI_ONBOARDING_PROMPT.md**](docs/AI_ONBOARDING_PROMPT.md).  
+Copy that entire text and paste it into ChatGPT, Claude, or Gemini. The prompt instructs the AI to:
+* Act like a patient mentor who assumes you know nothing about programming.
+* Explain your specific file to you line by line.
+* Conduct a friendly mock viva review with 3 to 5 realistic questions.
+
+### Step 3: Review Expected Viva Questions
+Open [**docs/PROJECT_VIVA_QA.md**](docs/PROJECT_VIVA_QA.md).  
+Contains answers and diagrams for 13 common questions professors ask (hysteresis, sleep metabolism, SG90 servo safety, offline failsafe, and syllabus mapping).
+
+---
+
+## Team Division of Work: Who Does What
+
+Find your name below to see your assigned file and key speaking points for the review:
+
+| Team Member | Primary File | What to Explain in the Review |
+| :--- | :--- | :--- |
+| **Jalak Vijay Hadvani (Coordinator)** | [`comfort_model.py`](comfort_model.py) | **ASHRAE Standard 55 & Decision Logic:** Explain the linear formula `17.8 + 0.31 * outdoor`, the +1.0°C night sleep offset for blankets, and the thermostat hysteresis deadband that prevents switch chatter. |
+| **Priyamvadha H L** | [`weather_service.py`](weather_service.py) | **Live Weather Pipeline:** Explain how Python's `requests` library calls Open-Meteo for Vellore weather, how the 5-minute memory cache prevents API spamming, and how `try...except` handles internet drops. |
+| **Itla Naveen Shiv Shankar** | [`comfort_model.py`](comfort_model.py), [`dashboard.py`](dashboard.py) | **Run-Time Reduction & Metrics:** Explain why we do not guess chiller tonnage, how our system directly measures temperature and cuts active cooling time by ~50% overnight, preventing 16 degree-hours of overcooling. |
+| **Maneet Singh** | [`dashboard.py`](dashboard.py), [`app.py`](app.py), [`hardware/`](hardware/) | **Dashboard, API & Hardware:** Explain the Streamlit Notion dashboard, the resident preference slider, the Flask REST API, the ESP32 Arduino firmware, and how the SG90 servo motor flips the physical wall switch safely. |
+| **Smyan Ojha** | [`storage.py`](storage.py), [`test_system.py`](test_system.py) | **Data Storage, Testing & Failsafe:** Explain CSV logging using `with open`, the 7 automated unit tests in `test_system.py`, and how the ESP32 offline failsafe protects residents if WiFi disconnects. |
 
 ---
 
 ## 1. Project Overview & Problem Statement
 
-* **The Problem:** Most campus hostel AC units have binary on/off rocker switches with **zero thermostat and no remote control**. Left running overnight, rooms become uncomfortably cold (~19°C), causing sleep disruption, shivering under blankets, and massive wasted electricity.
-* **Why Focus Exclusively on Hostels (Not Classrooms):** Centralized campus classrooms use massive commercial chillers where accurate energy calculations require knowing chiller tonnage (TR), power ratings, airflow CFM, and real-time occupant counts — none of which are instrumented. In contrast, hostel rooms have decentralized binary AC units where a physical ESP32 retrofit directly solves a real overnight overcooling problem with verifiable physical hardware.
-* **Our Solution:** A lightweight Python system that fetches live outdoor weather for the Vellore campus, calculates real-time adaptive comfort thresholds with nighttime sleep compensation, and directly controls the physical AC switch via an ESP32 unit, while displaying live status and overnight cooling run-time reduction on a Notion-style web dashboard.
+* **The Problem:** Campus hostel AC units have only a binary on/off rocker switch on the wall — **no thermostat and no remote control**. Left running overnight, rooms plunge below 19°C, causing broken sleep, shivering under blankets, and massive wasted electricity.
+* **Why Hostels (Not Classrooms):** Academic buildings use centralized chillers where calculating energy requires knowing chiller tonnage (TR), power ratings, airflow CFM, and student headcounts — none of which are instrumented. In contrast, hostel rooms have individual wall switches right in front of us, where our ESP32 device directly solves a real physical problem.
+* **Our Solution:** An affordable IoT retrofit (**₹813 BOM**) with an ESP32 microcontroller, a DHT11 temperature sensor, and an SG90 micro servo motor. The system calculates real-time comfort using ASHRAE Standard 55 with nighttime sleep compensation, and mechanically toggles the wall switch ON or OFF while reporting live telemetry to a Notion-style web dashboard.
 
 ---
 
@@ -56,41 +91,37 @@ flowchart TD
 
 ---
 
-## 3. Quick Start (Run in 60 Seconds)
+## 3. Quick Start (Run on Your Laptop in 60 Seconds)
 
-### Prerequisites
-- Python 3.10+ (tested on Python 3.13)
-- Required packages:
-  ```bash
-  py -m pip install -r requirements.txt
-  ```
+### Step 1: Install Required Packages
+Open PowerShell or Command Prompt in this folder and run:
+```bash
+py -m pip install -r requirements.txt
+```
 
-### Option A: Run Full System (Flask API + Notion Dashboard)
+### Step 2: Verify the Code (Automated Tests)
+Run the 7-step automated test suite to confirm everything works:
+```bash
+py test_system.py
+```
+*(All 7 tests should complete in under 1 second with `OK`.)*
+
+### Step 3: Launch the Full System (1-Click)
 ```bash
 py run_system.py
 ```
-- **Web Dashboard:** [http://localhost:8501](http://localhost:8501)
-- **Flask REST API:** [http://127.0.0.1:5000](http://127.0.0.1:5000)
+* **Web Dashboard:** [http://localhost:8501](http://localhost:8501)
+* **Flask REST API:** [http://127.0.0.1:5000](http://127.0.0.1:5000)
 
-### Option B: Run Dashboard Only
-```bash
-py run_system.py --dashboard-only
-```
-*(The dashboard has a built-in sensor simulator in the sidebar to test decisions without running the Flask server!)*
-
-### Option C: Run Hardware Simulator (Demo Without ESP32)
-In a separate terminal, test the automated room heating/cooling cycle:
-```bash
-py simulate_esp32.py
-```
-Or run in interactive mode to test custom temperatures:
-```bash
-py simulate_esp32.py --interactive
-```
+### Testing Without Hardware:
+In the dashboard sidebar:
+1. Adjust the **"Your Preferred Temperature"** slider.
+2. Use the **"Test Sensor Simulator"** slider to test room temperatures from 18°C to 30°C.
+3. Click **"Send Reading to Model"** to watch the AC switch state and servo angle flip live on screen!
 
 ---
 
-## 4. Hardware Unit Setup (BOM: ₹813)
+## 4. Hardware Setup (BOM: ₹813)
 
 ### Bill of Materials
 | Component | Function | Approx Price (₹) |
@@ -101,7 +132,7 @@ py simulate_esp32.py --interactive
 | **DHT11 Sensor** | Room temperature & humidity sensing | 51 |
 | **Total** | | **₹813** |
 
-### Pinout Wiring Table
+### Pinout Connections
 * **DHT11 Data Pin:** Connect to `GPIO 4` (VCC to `3V3`, GND to `GND`)
 * **SG90 Servo Signal:** Connect to `GPIO 18` (VCC to `VIN 5V`, GND to `GND`)
 * **I2C Display (OLED / LCD):**
@@ -109,17 +140,6 @@ py simulate_esp32.py --interactive
   - `SCL` -> `GPIO 22`
   - `VCC` -> `3V3` (for OLED) or `5V` (for 16x2 LCD)
   - `GND` -> `GND`
-
-### Flashing the ESP32
-1. Open Arduino IDE.
-2. Install required libraries from Library Manager:
-   - `DHT sensor library` (Adafruit)
-   - `ESP32Servo` (Kevin Harrington)
-   - `ArduinoJson` (Benoit Blanchon)
-   - `Adafruit SSD1306` & `Adafruit GFX` (if using OLED)
-3. Open `hardware/hostel_ac_controller/hostel_ac_controller.ino`.
-4. Update `WIFI_SSID`, `WIFI_PASSWORD`, and your laptop's local IP in `SERVER_URL`.
-5. Select Board **ESP32 Dev Module** and click **Upload**.
 
 ---
 
@@ -135,9 +155,9 @@ $$T_{\text{comf}} = 17.8 + 0.31 \times T_{\text{outdoor}}$$
   - Daytime clothing ($I_{cl} \approx 0.5\text{ clo}$) vs. blankets/sleepwear ($I_{cl} \approx 1.2 - 1.5\text{ clo}$).
   - Lower basal heat production + higher blanket insulation shifts the comfortable setpoint up by **+1.0°C**, preventing shivering or disturbed sleep.
 * **Hysteresis Deadband:**
-  - Once room temperature cools to the lower limit, AC is switched OFF.
-  - The AC only turns back ON when the room warms up to the upper comfort threshold.
-  - This prevents compressor cycling and switch wear.
+  - Once room temperature cools to the lower limit, the AC is switched OFF (0°).
+  - The AC only turns back ON (90°) when the room warms up to the upper comfort threshold.
+  - Between the two thresholds, the AC stays in its previous state, preventing compressor chatter.
 
 ---
 
@@ -152,15 +172,3 @@ $$T_{\text{comf}} = 17.8 + 0.31 \times T_{\text{outdoor}}$$
 | **Exception Handling** | `try...except` handling API network drops with offline fallback |
 | **Networking & APIs** | `requests` querying Open-Meteo; Flask serving REST endpoints for ESP32 |
 | **Data Visualization** | Interactive Plotly time-series comfort bands & Streamlit Notion UI |
-
----
-
-## 7. Team Division of Work
-
-| Team Member | Core Responsibility |
-| :--- | :--- |
-| **Jalak Vijay Hadvani (Coordinator)** | ASHRAE Adaptive Comfort Model implementation; overall integration |
-| **Priyamvadha H L** | Weather API integration and outdoor meteorological data pipeline |
-| **Itla Naveen Shiv Shankar** | Nocturnal thermal dynamics & overnight energy savings analysis |
-| **Maneet Singh** | Dashboard (Streamlit/Plotly), ESP32 firmware, sensor & servo hardware integration |
-| **Smyan Ojha** | Testing, edge-case handling, documentation and presentation |
