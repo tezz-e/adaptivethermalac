@@ -17,50 +17,85 @@ import weather_service
 import comfort_model
 import storage
 
+import base64
+from pathlib import Path
+
 # --------------------------------------------------------------------------------------
-# 1. PAGE SETUP & NOTION-STYLE CSS
+# 1. PAGE SETUP & NOTION-STYLE CSS WITH ADVERA / SANS FONT
 # --------------------------------------------------------------------------------------
+def load_advera_font_css():
+    """Embeds Advera font as base64 WOFF2 for zero-flicker custom typography."""
+    font_path = Path("assets/fonts/Advera.woff2")
+    if not font_path.exists():
+        font_path = Path("E:/gfx/fonts/Advera.woff2")
+    if font_path.exists():
+        try:
+            with open(font_path, "rb") as f:
+                b64 = base64.b64encode(f.read()).decode("utf-8")
+            return f"""
+            @font-face {{
+                font-family: 'Advera';
+                src: url('data:font/woff2;base64,{b64}') format('woff2');
+                font-weight: 400;
+                font-style: normal;
+                font-display: swap;
+            }}
+            """
+        except Exception:
+            pass
+    return ""
+
 st.set_page_config(
     page_title="Hostel AC Thermal Comfort System",
-    page_icon="❄️",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Notion-style clean styling
+# Clean typography & dark/light responsive styling
 st.markdown(
-    """
+    f"""
     <style>
-    .notion-header { border-bottom: 1px solid #e9e9e7; padding-bottom: 14px; margin-bottom: 20px; }
-    .notion-title { font-size: 2.1rem; font-weight: 700; color: #37352f; margin-bottom: 4px; }
-    .notion-desc { font-size: 0.95rem; color: #787774; }
-    .notion-card {
-        background-color: #ffffff;
-        border: 1px solid #e9e9e7;
+    {load_advera_font_css()}
+
+    html, body, [class*="css"], [class*="st-"], .stApp, .stMarkdown, p, div, span, label, button, input, textarea, select {{
+        font-family: 'Advera', 'Helvetica Neue', 'Helvetica', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+    }}
+
+    h1, h2, h3, h4, h5, h6 {{
+        font-family: 'Advera', 'Helvetica Neue', 'Helvetica', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+        letter-spacing: -0.01em;
+    }}
+
+    .notion-header {{ border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: 14px; margin-bottom: 20px; }}
+    .notion-title {{ font-size: 2.1rem; font-weight: 700; margin-bottom: 4px; letter-spacing: -0.02em; }}
+    .notion-desc {{ font-size: 0.95rem; opacity: 0.8; }}
+    .notion-card {{
+        background-color: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 8px;
         padding: 16px 20px;
         margin-bottom: 14px;
-        box-shadow: 0 1px 2px rgba(15, 15, 15, 0.04);
-    }
-    .notion-card-title { font-size: 0.8rem; text-transform: uppercase; font-weight: 600; color: #787774; margin-bottom: 6px; }
-    .notion-card-metric { font-size: 1.9rem; font-weight: 700; color: #37352f; margin-bottom: 4px; }
-    .notion-card-subtitle { font-size: 0.8rem; color: #787774; }
-    .notion-callout {
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+    }}
+    .notion-card-title {{ font-size: 0.78rem; text-transform: uppercase; font-weight: 600; opacity: 0.7; margin-bottom: 6px; letter-spacing: 0.05em; }}
+    .notion-card-metric {{ font-size: 1.9rem; font-weight: 700; margin-bottom: 4px; }}
+    .notion-card-subtitle {{ font-size: 0.8rem; opacity: 0.7; }}
+    .notion-callout {{
         display: flex;
         align-items: flex-start;
-        padding: 12px 16px;
+        padding: 14px 18px;
         border-radius: 8px;
-        background-color: #f7f6f3;
-        border: 1px solid #e3e2de;
-        margin: 12px 0px;
+        background-color: rgba(245, 158, 11, 0.08);
+        border: 1px solid rgba(245, 158, 11, 0.25);
+        margin: 14px 0px;
         font-size: 0.92rem;
-        color: #37352f;
-    }
-    .notion-tag { display: inline-block; padding: 2px 8px; font-size: 0.78rem; font-weight: 500; border-radius: 4px; margin-right: 6px; }
-    .tag-blue { background-color: #edf5fa; color: #1e6b9c; border: 1px solid #c3dff2; }
-    .tag-green { background-color: #eaf5ea; color: #2b7a3e; border: 1px solid #c2e2c6; }
-    .tag-amber { background-color: #fcf4e6; color: #9c6819; border: 1px solid #f2dec0; }
-    .tag-gray { background-color: #f1f1ef; color: #5a5a57; }
+        color: #fbbf24;
+    }}
+    .notion-tag {{ display: inline-block; padding: 2px 8px; font-size: 0.78rem; font-weight: 500; border-radius: 4px; margin-right: 6px; }}
+    .tag-blue {{ background-color: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }}
+    .tag-green {{ background-color: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }}
+    .tag-amber {{ background-color: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }}
+    .tag-gray {{ background-color: rgba(156, 163, 175, 0.15); color: #9ca3af; border: 1px solid rgba(156, 163, 175, 0.3); }}
     </style>
     """,
     unsafe_allow_html=True
@@ -89,10 +124,10 @@ hostel_room = st.session_state.hostel_room
 # 3. SIDEBAR CONTROLS & TEST SIMULATOR
 # --------------------------------------------------------------------------------------
 with st.sidebar:
-    st.markdown("### ⚙️ System Settings")
+    st.markdown("### System Settings")
     st.markdown(
         f"""
-        <div style="font-size: 0.85rem; color: #5a5a57; margin-bottom: 12px;">
+        <div style="font-size: 0.85rem; opacity: 0.8; margin-bottom: 12px;">
             <b>Campus:</b> {config.CAMPUS_NAME}<br>
             <b>Coordinates:</b> {config.CAMPUS_LATITUDE}°N, {config.CAMPUS_LONGITUDE}°E<br>
             <b>Local Time:</b> {time.strftime('%I:%M %p')}
@@ -103,7 +138,7 @@ with st.sidebar:
     st.divider()
 
     # RESIDENT PREFERRED TEMPERATURE SLIDER (OPTION A)
-    st.markdown("**🎯 Resident Temperature Preference**")
+    st.markdown("**Resident Temperature Preference**")
     current_pref = float(hostel_room.get("preferred_temp", config.DEFAULT_PREFERRED_TEMP))
     selected_pref = st.slider(
         "Preferred Room Target (°C)",
@@ -153,7 +188,7 @@ with st.sidebar:
     sim_temp = st.slider("Room Temperature (°C)", 18.0, 32.0, float(hostel_room["current_temp"]), 0.5)
     sim_hum = st.slider("Room Humidity (%)", 30, 90, int(hostel_room["current_humidity"]), 5)
 
-    if st.button("📡 Send Reading to Model", use_container_width=True):
+    if st.button("Send Reading to Model", use_container_width=True):
         if hostel_room["manual_override"] and hostel_room["override_state"] in ("ON", "OFF"):
             ac_state = hostel_room["override_state"]
             servo_angle = config.SERVO_ON_ANGLE if ac_state == "ON" else config.SERVO_OFF_ANGLE
@@ -197,7 +232,7 @@ with st.sidebar:
 st.markdown(
     """
     <div class="notion-header">
-        <div class="notion-title">❄️ Adaptive Thermal Comfort AC Controller for Hostels</div>
+        <div class="notion-title">Adaptive Thermal Comfort AC Controller for Hostels</div>
         <div class="notion-desc">
             Direct physical switch actuation for binary hostel ACs via ESP32, DHT11, and SG90 servo motor,
             governed by the ASHRAE 55 Adaptive Comfort Model with overnight sleep compensation.
@@ -217,11 +252,11 @@ st.markdown(
 # 5. NAVIGATION TABS
 # --------------------------------------------------------------------------------------
 tab_hostel, tab_savings, tab_science, tab_logs, tab_specs = st.tabs([
-    "🏠 Hostel AC Unit",
-    "⚡ Overnight Energy Savings",
-    "🌙 Sleep Biology & Weather",
-    "📊 Telemetry Logs",
-    "📋 Project Specs & Team"
+    "Hostel AC Unit",
+    "Overnight Run-Time Analytics",
+    "Sleep Biology & Weather",
+    "Telemetry Logs",
+    "System Architecture & Hardware"
 ])
 
 # ======================================================================================
@@ -292,14 +327,12 @@ with tab_hostel:
         hostel_room["ac_state"]
     )
 
-    callout_icon = "🌙" if hostel_comfort_band["is_night_mode"] else "☀️"
     st.markdown(
         f"""
         <div class="notion-callout">
-            <span style="font-size: 1.25rem; margin-right: 10px;">{callout_icon}</span>
             <div>
                 <b>Decision Rationale:</b> {explanation}<br>
-                <span style="font-size: 0.85rem; color: #787774;">
+                <span style="font-size: 0.85rem; opacity: 0.85;">
                     Hysteresis prevents rapid compressor toggling. Overnight sleep adjustment (+1.0°C) 
                     prevents waking up cold under blankets.
                 </span>
@@ -310,13 +343,13 @@ with tab_hostel:
     )
 
     # Telemetry Trend Plot
-    st.markdown("#### 📈 Room Temperature vs Comfort Band Trend")
+    st.markdown("#### Room Temperature vs Comfort Band Trend")
     history_df = storage.read_telemetry_history(limit=30)
 
     if not history_df.empty:
         fig = go.Figure()
 
-        # Green shaded band for acceptable comfort range
+        # Shaded band for acceptable comfort range
         fig.add_trace(go.Scatter(
             x=history_df["timestamp"], y=history_df["comfort_max"],
             mode="lines", line=dict(width=0), showlegend=False, hoverinfo="skip"
@@ -324,28 +357,52 @@ with tab_hostel:
         fig.add_trace(go.Scatter(
             x=history_df["timestamp"], y=history_df["comfort_min"],
             mode="lines", line=dict(width=0), fill="tonexty",
-            fillcolor="rgba(34, 197, 94, 0.12)", name="80% Comfort Band", hoverinfo="skip"
+            fillcolor="rgba(34, 197, 94, 0.18)", name="80% Comfort Band", hoverinfo="skip"
         ))
 
         # Optimal target line
         fig.add_trace(go.Scatter(
             x=history_df["timestamp"], y=history_df["target_optimal"],
             mode="lines", name="Target Setpoint",
-            line=dict(color="#10B981", dash="dash", width=1.5)
+            line=dict(color="#10B981", dash="dash", width=1.8)
         ))
 
         # Room temperature reading
         fig.add_trace(go.Scatter(
             x=history_df["timestamp"], y=history_df["current_temp"],
             mode="lines+markers", name="Room Temp (DHT11)",
-            line=dict(color="#2563EB", width=2.5), marker=dict(size=6)
+            line=dict(color="#3B82F6", width=2.5), marker=dict(size=6, color="#3B82F6")
         ))
 
         fig.update_layout(
-            template="plotly_white", height=320,
-            margin=dict(l=20, r=20, t=20, b=20),
-            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-            xaxis_title="Time", yaxis_title="Temperature (°C)", yaxis=dict(range=[20, 32])
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="rgba(0,0,0,0)",
+            height=330,
+            margin=dict(l=20, r=20, t=25, b=20),
+            font=dict(family="Advera, 'Helvetica Neue', Helvetica, sans-serif", color="#CBD5E1", size=12),
+            legend=dict(
+                orientation="h",
+                yanchor="bottom",
+                y=1.02,
+                xanchor="right",
+                x=1,
+                bgcolor="rgba(0,0,0,0)",
+                font=dict(color="#CBD5E1", size=11)
+            ),
+            xaxis=dict(
+                title=dict(text="Time", font=dict(color="#94A3B8")),
+                tickfont=dict(color="#94A3B8"),
+                gridcolor="rgba(255, 255, 255, 0.08)",
+                zerolinecolor="rgba(255, 255, 255, 0.08)"
+            ),
+            yaxis=dict(
+                title=dict(text="Temperature (°C)", font=dict(color="#94A3B8")),
+                tickfont=dict(color="#94A3B8"),
+                gridcolor="rgba(255, 255, 255, 0.08)",
+                zerolinecolor="rgba(255, 255, 255, 0.08)",
+                range=[20, 32]
+            ),
+            hovermode="x unified"
         )
         st.plotly_chart(fig, use_container_width=True)
     else:
@@ -355,7 +412,7 @@ with tab_hostel:
 # TAB 2: OVERNIGHT RUN-TIME REDUCTION & COMFORT METRICS
 # ======================================================================================
 with tab_savings:
-    st.markdown("### ⏱️ Active Run-Time & Overcooling Prevention")
+    st.markdown("### Active Run-Time & Overcooling Prevention")
     st.markdown(
         """
         Our campus hostel has centralized cooling with a local binary wall switch. 
@@ -403,7 +460,7 @@ with tab_savings:
             unsafe_allow_html=True
         )
 
-    st.markdown("#### 💡 Why Measure Run-Time & Temperature Directly?")
+    st.markdown("#### Why Measure Run-Time & Temperature Directly?")
     st.info(
         "Centralized cooling systems deliver cold air into student rooms, but without automation, "
         "rooms plunge to 19°C overnight. By cutting active run-time by **"
@@ -415,7 +472,7 @@ with tab_savings:
 # TAB 3: SLEEP BIOLOGY & WEATHER
 # ======================================================================================
 with tab_science:
-    st.markdown("### 🌙 Human Sleep Biology & ASHRAE Standard 55")
+    st.markdown("### Human Sleep Biology & ASHRAE Standard 55")
     col_w1, col_w2, col_w3 = st.columns(3)
     with col_w1:
         st.metric("Outdoor Temperature (Campus)", f"{current_weather['temperature_c']:.1f} °C")
@@ -427,10 +484,10 @@ with tab_science:
     st.divider()
     st.markdown(
         r"""
-        #### 📐 The Mathematical Formula
+        #### The Mathematical Formula
         $$T_{\text{comf}} = 17.8 + 0.31 \times T_{\text{outdoor}}$$
 
-        #### 💤 Why Do We Feel Colder Sleeping Overnight?
+        #### Why Do We Feel Colder Sleeping Overnight?
         1. **Lower Metabolic Heat ($M$):** Drops from $1.0\text{ met}$ (awake) to $0.7\text{ met}$ (sleeping basal state). The body produces ~30% less internal heat.
         2. **Bedding Insulation ($I_{cl}$):** Increases from $0.5\text{ clo}$ (t-shirt/shorts) to $1.2 - 1.5\text{ clo}$ (sleepwear + heavy blankets).
         3. **The Result:** The human body needs a warmer ambient temperature (+1.0°C offset) to remain in thermal equilibrium. Turning off the AC when the room reaches ~25.5°C prevents hypothermic waking.
@@ -441,7 +498,7 @@ with tab_science:
 # TAB 4: TELEMETRY LOGS & CSV EXPORT
 # ======================================================================================
 with tab_logs:
-    st.markdown("### 📊 Historical Sensor Telemetry Logs")
+    st.markdown("### Historical Sensor Telemetry Logs")
     st.caption("Demonstrating Python File Handling: Reading and writing CSV logs using 'with open'.")
 
     full_history = storage.read_telemetry_history(limit=100)
@@ -449,7 +506,7 @@ with tab_logs:
         st.dataframe(full_history, use_container_width=True)
         csv_data = full_history.to_csv(index=False).encode('utf-8')
         st.download_button(
-            label="📥 Download CSV File",
+            label="Download CSV File",
             data=csv_data,
             file_name="hostel_telemetry.csv",
             mime="text/csv"
@@ -461,7 +518,7 @@ with tab_logs:
 # TAB 5: SPECS & TEAM
 # ======================================================================================
 with tab_specs:
-    st.markdown("### 📋 Hardware Bill of Materials (BOM)")
+    st.markdown("### Hardware Bill of Materials (BOM)")
     bom_data = pd.DataFrame([
         {"Component": "ESP32 DevKit V1 Board", "Role": "WiFi microcontroller & HTTP client", "Price (₹)": 400},
         {"Component": "SG90 Micro Servo Motor", "Role": "Physical AC switch actuator (0°/90°)", "Price (₹)": 150},
@@ -472,7 +529,7 @@ with tab_specs:
     st.table(bom_data)
 
     st.divider()
-    st.markdown("### 🎓 First-Year Python Syllabus Mapping")
+    st.markdown("### Technical Implementation Mapping")
     syllabus_mapping = pd.DataFrame([
         {"Topic": "Functions", "Implementation": "calculate_ashrae_comfort, evaluate_hostel_ac_decision, calculate_runtime_reduction"},
         {"Topic": "Conditionals (if/elif/else)", "Implementation": "Hysteresis decision branching and night-time mode detection"},
@@ -485,12 +542,13 @@ with tab_specs:
     st.table(syllabus_mapping)
 
     st.divider()
-    st.markdown("### 🛠️ Subsystem Architecture & Responsibilities")
+    st.markdown("### Subsystem Architecture & Responsibilities")
     roles_data = pd.DataFrame([
         {"Subsystem": "Comfort Modeling Lead", "Responsibility": "ASHRAE Adaptive Comfort Model implementation & hysteresis decision logic"},
         {"Subsystem": "Weather Pipeline Lead", "Responsibility": "Open-Meteo REST API integration, data acquisition, and offline fallback"},
         {"Subsystem": "Thermal Analytics Lead", "Responsibility": "Diurnal sleep profile modeling & run-time reduction analysis"},
         {"Subsystem": "Full-Stack & Hardware Lead", "Responsibility": "Streamlit Notion UI, Flask API, ESP32 firmware & SG90 servo switch actuation"},
-        {"Subsystem": "Testing & Storage Lead", "Responsibility": "CSV storage pipeline with 'with open', 7 automated unit tests, and edge-case handling"}
+        {"Subsystem": "Data Storage & Failsafe Lead", "Responsibility": "CSV storage pipeline with 'with open', failsafe edge-case handling, and ESP32 offline autonomy"}
     ])
+    roles_data = roles_data.reset_index(drop=True)
     st.table(roles_data)

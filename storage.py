@@ -81,6 +81,7 @@ def save_telemetry(record_dict):
 def read_telemetry_history(limit=50):
     """
     Reads the last 'limit' records from the CSV file into a pandas DataFrame.
+    Filters test records and sorts chronologically by timestamp.
     Returns an empty DataFrame if no data is found.
     """
     ensure_csv_exists()
@@ -89,8 +90,15 @@ def read_telemetry_history(limit=50):
         df = pd.read_csv(config.CSV_FILE_PATH)
         if df.empty:
             return pd.DataFrame()
+        # Filter out test records if present
+        if "room_id" in df.columns:
+            df = df[df["room_id"] != "TEST_ROOM"]
+        # Parse timestamps and sort chronologically
+        if "timestamp" in df.columns:
+            df["timestamp"] = pd.to_datetime(df["timestamp"])
+            df = df.sort_values("timestamp")
         # Return only the most recent rows
-        return df.tail(limit)
+        return df.tail(limit).reset_index(drop=True)
     except Exception as error:
         print(f"[Storage Error] Could not read CSV: {error}")
         return pd.DataFrame()
