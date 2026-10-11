@@ -16,6 +16,17 @@ import time
 import subprocess
 import argparse
 
+if sys.stdout and hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+if sys.stderr and hasattr(sys.stderr, "reconfigure"):
+    try:
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
 PYTHON_EXE = sys.executable
 
 
@@ -44,34 +55,34 @@ def main():
 
     try:
         if args.backend_only:
-            print("🚀 Launching Flask API Backend (Port 5000)...")
+            print("[*] Launching Flask API Backend (Port 5000)...")
             p = start_backend()
             processes.append(p)
             print(" -> API active at: http://127.0.0.1:5000")
             p.wait()
 
         elif args.dashboard_only:
-            print("🚀 Launching Streamlit Notion-Style Dashboard (Port 8501)...")
+            print("[*] Launching Streamlit Notion-Style Dashboard (Port 8501)...")
             p = start_dashboard()
             processes.append(p)
             print(" -> Dashboard active at: http://localhost:8501")
             p.wait()
 
         else:
-            print("🚀 [1/2] Starting Flask API Backend (Port 5000)...")
+            print("[1/2] Starting Flask API Backend (Port 5000)...")
             p_back = start_backend()
             processes.append(p_back)
             time.sleep(2)
 
-            print("🚀 [2/2] Starting Streamlit Notion-Style Dashboard (Port 8501)...")
+            print("[2/2] Starting Streamlit Notion-Style Dashboard (Port 8501)...")
             p_dash = start_dashboard()
             processes.append(p_dash)
 
             print("\n------------------------------------------------------------------")
-            print("✅ SYSTEM READY AND OPERATIONAL!")
-            print("🌐 Web Dashboard:    http://localhost:8501")
-            print("🔌 Flask API Server: http://127.0.0.1:5000")
-            print("📡 ESP32 Endpoint:   http://<YOUR_IP>:5000/api/hostel/telemetry")
+            print("[OK] SYSTEM READY AND OPERATIONAL!")
+            print("  Web Dashboard:    http://localhost:8501")
+            print("  Flask API Server: http://127.0.0.1:5000")
+            print("  ESP32 Endpoint:   http://<YOUR_IP>:5000/api/hostel/telemetry")
             print("------------------------------------------------------------------")
             print("Press Ctrl+C at any time in this window to stop both programs.\n")
 
@@ -79,7 +90,7 @@ def main():
                 time.sleep(1)
 
     except KeyboardInterrupt:
-        print("\n🛑 Shutting down services safely...")
+        print("\nShutting down services safely...")
         for p in processes:
             p.terminate()
             try:
