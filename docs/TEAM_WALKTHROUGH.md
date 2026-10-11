@@ -58,9 +58,9 @@ Imagine three friends sitting in a room together:
 Who is right? If you just pick a random number out of thin air, people will argue, and machines will waste electricity.
 
 More importantly, human biology does not work like a fixed thermostat:
-1. When you live in a warm place like Vellore, where outdoor summer weather reaches 33 to 36 degrees Celsius, your body naturally adapts. Your blood vessels open up, your skin adjusts, and you wear lighter clothes.
+1. When you live in a warm tropical region, where outdoor summer weather reaches 33 to 36 degrees Celsius, your body naturally adapts. Your blood vessels open up, your skin adjusts, and you wear lighter clothes.
 2. If you walk from a 35-degree outdoor afternoon into an artificially frozen 20-degree room, your body experiences thermal shock. You sneeze, your muscles tense up, and you feel cold.
-3. But in that exact same Vellore climate, a room kept at 26 or 27 degrees feels wonderfully cool, refreshing, and comfortable!
+3. But in that exact same climate, a room kept at 26 or 27 degrees feels wonderfully cool, refreshing, and comfortable!
 
 This scientific realization is called the **Adaptive Comfort Model**: human beings naturally adapt their comfort expectations based on the prevailing outdoor weather.
 
@@ -70,7 +70,7 @@ ASHRAE researchers studied thousands of real occupants across dozens of countrie
 `Comfortable Indoor Temperature = 17.8 + (0.31 * Outdoor Temperature)`
 
 Let us see what this formula does in real life:
-* On a warm Vellore day when it is 30.0 degrees Celsius outside:  
+* On a warm summer day when it is 30.0 degrees Celsius outside:  
   `17.8 + (0.31 * 30.0) = 17.8 + 9.3 = 27.1 degrees Celsius`.  
   The formula tells us: "Do not waste electricity forcing the room down to 21 degrees! 27.1 degrees is comfortable for people today."
 * On a cooler rainy day when it is 22.0 degrees Celsius outside:  
@@ -112,10 +112,10 @@ Let us go through each file in our project one by one, explaining why it exists,
 ### File 1: `config.py` (The Settings Ledger)
 
 What is it?  
-Think of `config.py` like the settings page of an application. Instead of typing the number `12.9692` (Vellore latitude) or `25.0` (target temperature) in ten different places, we write them down once here.
+Think of `config.py` like the settings page of an application. Instead of typing the number `12.9692` (latitude) or `25.0` (target temperature) in ten different places, we write them down once here.
 
 What is inside?
-* `CAMPUS_LATITUDE = 12.9692` and `CAMPUS_LONGITUDE = 79.1559`: Tells our weather service where Vellore is on Earth.
+* `CAMPUS_LATITUDE = 12.9692` and `CAMPUS_LONGITUDE = 79.1559`: Tells our weather service our campus location on Earth.
 * `FLASK_PORT = 5000`: The communication channel on our laptop where the ESP32 sends messages.
 * `ASHRAE_INTERCEPT = 17.8` and `ASHRAE_SLOPE = 0.31`: The standard mathematical numbers established by international thermal scientists.
 * `NIGHT_START_HOUR = 22` and `NIGHT_END_HOUR = 7`: Defines nighttime as 10:00 PM to 7:00 AM.
@@ -129,7 +129,7 @@ What is inside?
 ### File 2: `weather_service.py` (Fetching Outdoor Weather)
 
 What is it?  
-This file connects to the internet to find out the real outdoor temperature in Vellore right now.
+This file connects to the internet to find out the real outdoor temperature right now.
 
 Why do we import `requests`?  
 Python by default does not know how to open a webpage. The `requests` library is Python's telephone. It allows Python to make a web call to an API and download data.
@@ -284,7 +284,7 @@ Here is a breakdown of each technical area along with a clear speaking script fo
 * Primary Files: `weather_service.py`
 * Core Concepts: Open-Meteo REST API, live data acquisition, 5-minute memory caching, network error resilience.
 * What you say to the examiner:
-  > "I designed the outdoor weather data acquisition pipeline in `weather_service.py`. Our system connects to the Open-Meteo REST API using Python's `requests` library to fetch live outdoor temperature and humidity for our Vellore campus coordinates. Because outdoor weather changes slowly, I implemented a 5-minute memory check so we do not make unnecessary web requests on every 5-second sensor ping. I also implemented exception handling using `try...except` so that if the internet drops, the system falls back to safe backup numbers without interrupting hardware operation."
+  > "I designed the outdoor weather data acquisition pipeline in `weather_service.py`. Our system connects to the Open-Meteo REST API using Python's `requests` library to fetch live outdoor temperature and humidity for our campus coordinates. Because outdoor weather changes slowly, I implemented a 5-minute memory check so we do not make unnecessary web requests on every 5-second sensor ping. I also implemented exception handling using `try...except` so that if the internet drops, the system falls back to safe backup numbers without interrupting hardware operation."
 
 ---
 

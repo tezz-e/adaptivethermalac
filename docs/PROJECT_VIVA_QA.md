@@ -1,6 +1,6 @@
 # Project Review & Viva Q&A Guide
 ### Adaptive Thermal Comfort AC Controller for Campus Hostels
-**Course:** BTech First Year Engineering Project | Vellore Campus
+**Course:** BTech First Year Engineering Project
 
 ---
 
@@ -105,7 +105,7 @@ This was a deliberate and realistic engineering design decision based on physica
    - Rather than treating human beings like machines that need an unchanging 22°C or 24°C year-round, Standard 55 defines the **Adaptive Comfort Model**.
 
 3. **Why Not Just Use a Static 22°C or 24°C?**
-   - **Acclimatization:** In hot, tropical regions like Vellore (where outdoor summer temperatures reach 34°C–38°C), the human body naturally acclimates to warmth through physiological changes (vasodilation, sweating thresholds, and lighter clothing).
+   - **Acclimatization:** In hot, tropical climates (where outdoor summer temperatures reach 34°C–38°C), the human body naturally acclimates to warmth through physiological changes (vasodilation, sweating thresholds, and lighter clothing).
    - **Thermal Shock:** Walking from a 35°C outdoor environment into a static 20°C–22°C room causes thermal discomfort, respiratory irritation, and hypothermic shivering. In that climate, a room at 26°C–27°C feels perfectly refreshing and comfortable!
    - **Eliminates Subjective Guesswork:** Instead of roommates arguing over arbitrary numbers, referencing an international standard gives the system objective, scientifically validated authority.
 
@@ -115,7 +115,7 @@ This was a deliberate and realistic engineering design decision based on physica
    $$T_{\text{comf}} = 17.8 + 0.31 \times T_{\text{outdoor}}$$
 
    * $T_{\text{comf}}$: Optimal indoor operative comfort temperature (°C).
-   * $T_{\text{outdoor}}$: Prevailing mean outdoor air temperature (°C), fetched live for the Vellore campus via Open-Meteo.
+   * $T_{\text{outdoor}}$: Prevailing mean outdoor air temperature (°C), fetched live for the campus location via Open-Meteo.
    * **80% Acceptability Limits:** $T_{\text{comf}} \pm 1.75^\circ\text{C}$ (Standard campus design tolerance).
 
 | Outdoor Temp (°C) | Optimal Comfort $T_{\text{comf}}$ (°C) | 80% Acceptable Band (°C) |

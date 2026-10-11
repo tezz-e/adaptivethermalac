@@ -6,8 +6,8 @@ Stores geographic location, comfort thresholds, hardware settings, and file path
 ================================================================================
 """
 
-# Campus Geographic Location (Vellore, Tamil Nadu)
-CAMPUS_NAME = "Vellore Campus"
+# Campus Geographic Coordinates
+CAMPUS_NAME = "Campus Hostels"
 CAMPUS_LATITUDE = 12.9692
 CAMPUS_LONGITUDE = 79.1559
 

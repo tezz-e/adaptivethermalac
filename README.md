@@ -1,5 +1,5 @@
 # Adaptive Thermal Comfort AC Controller for Hostels
-### BTech First Year Engineering Project | Vellore Campus
+### BTech First Year Engineering Project
 
 > **A closed-loop physical IoT system:**
 > An ESP32 microcontroller with a DHT11 sensor monitors hostel room temperatures and mechanically actuates an **SG90 micro servo motor** to flip the physical AC rocker switch ON or OFF based on the **ASHRAE 55 Adaptive Comfort Model**, compensating for nighttime sleep metabolism and blanket insulation.
@@ -41,7 +41,7 @@ The system is organized into modular subsystems with clean separation of respons
 | Subsystem / Area | Primary Files | Key Concepts & Architecture |
 | :--- | :--- | :--- |
 | **Comfort Model & Decision Logic** | [`comfort_model.py`](comfort_model.py) | **ASHRAE Standard 55 & Decision Logic:** Linear formula `17.8 + 0.31 * outdoor`, +1.0°C night sleep offset for blankets, and thermostat hysteresis deadband to prevent switch chatter. |
-| **Weather Pipeline** | [`weather_service.py`](weather_service.py) | **Live Meteorological Pipeline:** Open-Meteo REST API data fetching for Vellore coordinates, 5-minute memory cache to prevent API spamming, and `try...except` offline fallback. |
+| **Weather Pipeline** | [`weather_service.py`](weather_service.py) | **Live Meteorological Pipeline:** Open-Meteo REST API data fetching for campus coordinates, 5-minute memory cache to prevent API spamming, and `try...except` offline fallback. |
 | **Run-Time Analytics** | [`comfort_model.py`](comfort_model.py), [`dashboard.py`](dashboard.py) | **Cooling Run-Time Reduction:** Directly measured temperature dynamics cutting active cooling time by ~50% overnight, preventing 16 degree-hours of overcooling without guessing chiller tonnage. |
 | **Dashboard & Web API** | [`dashboard.py`](dashboard.py), [`app.py`](app.py) | **Presentation & Communication:** Streamlit Notion-style web dashboard, resident preference slider, and Flask REST API endpoints serving JSON decisions to the ESP32. |
 | **Hardware & Firmware** | [`hardware/`](hardware/) | **Embedded IoT Actuation:** ESP32 DevKit C++ firmware, DHT11 sensing on GPIO 4, and SG90 servo motor flipping the physical rocker switch safely without mains rewiring. |
@@ -62,7 +62,7 @@ The system is organized into modular subsystems with clean separation of respons
 ```mermaid
 flowchart TD
     subgraph Data Acquisition
-        API["Open-Meteo Weather API<br/>(Live Vellore Weather)"]
+        API["Open-Meteo Weather API<br/>(Live Campus Weather)"]
         DHT["DHT11 Sensor<br/>(Room Temp and Humidity)"]
     end
 

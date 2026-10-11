@@ -21,7 +21,7 @@ import storage
 # 1. PAGE SETUP & NOTION-STYLE CSS
 # --------------------------------------------------------------------------------------
 st.set_page_config(
-    page_title="Hostel AC Thermal Comfort | Vellore",
+    page_title="Hostel AC Thermal Comfort System",
     page_icon="❄️",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -205,7 +205,7 @@ st.markdown(
         <div style="margin-top: 10px;">
             <span class="notion-tag tag-blue">ASHRAE Standard 55</span>
             <span class="notion-tag tag-green">ESP32 + DHT11 + SG90 Servo</span>
-            <span class="notion-tag tag-amber">Vellore Campus</span>
+            <span class="notion-tag tag-amber">Campus Hostels</span>
             <span class="notion-tag tag-gray">Simple Functional Python</span>
         </div>
     </div>
@@ -418,7 +418,7 @@ with tab_science:
     st.markdown("### 🌙 Human Sleep Biology & ASHRAE Standard 55")
     col_w1, col_w2, col_w3 = st.columns(3)
     with col_w1:
-        st.metric("Outdoor Temperature (Vellore)", f"{current_weather['temperature_c']:.1f} °C")
+        st.metric("Outdoor Temperature (Campus)", f"{current_weather['temperature_c']:.1f} °C")
     with col_w2:
         st.metric("Relative Humidity", f"{current_weather['humidity_pct']:.0f} %")
     with col_w3:
