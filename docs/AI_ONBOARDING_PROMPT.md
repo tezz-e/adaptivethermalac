@@ -47,9 +47,8 @@ I am not deeply technical, so please assume I understand nothing about computer 
 4. `storage.py`: Saves readings to `data/hostel_telemetry.csv` using `with open` context managers.
 5. `app.py`: Flask API server receiving telemetry from the ESP32, accepting resident preferred temp, and returning JSON decisions.
 6. `dashboard.py`: Streamlit Notion-style web interface with resident preferred temp slider, simulator, and Plotly charts.
-7. `hostel_ac_controller.ino`: Arduino C++ code for ESP32 (DHT11, SG90 servo, OLED display).
-8. `simulate_esp32.py`: Terminal simulator allowing us to demo heating and cooling cycles without hardware.
-9. `test_system.py`: Automated 7-step test script checking weather, math, night offset, hysteresis, CSV, API, and preference slider.
+7. `hardware/hostel_ac_controller/hostel_ac_controller.ino`: Arduino C++ code for ESP32 (DHT11, SG90 servo, OLED display).
+8. `run_system.py`: 1-click launcher starting both the Flask API server and Streamlit dashboard concurrently.
 
 ---
 
@@ -59,7 +58,7 @@ I am not deeply technical, so please assume I understand nothing about computer 
 * Role 2 (Weather Pipeline): Open-Meteo API fetching, caching, and network error resilience (`weather_service.py`).
 * Role 3 (Run-Time Analytics): Nocturnal thermal dynamics & cooling run-time reduction analysis (`comfort_model.py`, `dashboard.py`).
 * Role 4 (Full-Stack & Hardware): Streamlit dashboard, Flask API, and ESP32 hardware firmware (`dashboard.py`, `app.py`, `hardware/`).
-* Role 5 (Testing & Storage): CSV storage with `with open`, automated unit tests, and offline failsafe (`storage.py`, `test_system.py`).
+* Role 5 (Data Storage & Failsafe): CSV storage with `with open`, data persistence, and offline autonomous failsafe (`storage.py`, `hardware/`).
 
 ---
 

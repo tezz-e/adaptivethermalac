@@ -242,27 +242,13 @@ How does an Arduino sketch work?
 
 ---
 
-### File 8: `simulate_esp32.py` (The Software Simulator)
+### File 8: `run_system.py` (The 1-Click System Launcher)
 
 What is it?  
-A terminal script that acts exactly like an ESP32. It lets you demonstrate the complete system to anyone without needing to plug in physical hardware or wires.
+A convenient launcher script that starts the entire project with a single command (`py run_system.py`).
 
 How does it work?
-It starts at 28 degrees. When the AC turns ON, it simulates realistic cooling by dropping the temperature by 0.4 degrees every few seconds. Once the AC turns OFF, it simulates the room slowly warming back up by 0.3 degrees. You can watch the full hysteresis cycle unfold in the terminal.
-
----
-
-### File 9: `test_system.py` (The Automated Verification Suite)
-
-What is it?  
-A test script using Python's standard `unittest` library. Running `py test_system.py` tests all 7 key parts of our project in under 1 second:
-1. Verifies the weather service fetches valid data.
-2. Verifies the ASHRAE linear formula and +1.0 degree sleep offset.
-3. Verifies the hysteresis decision logic (cold turns off, warm turns on).
-4. Verifies CSV file reading and writing.
-5. Verifies the Flask API endpoint response.
-6. Verifies the overnight run-time reduction math.
-7. Verifies the resident preferred temperature override.
+Instead of forcing you to open two separate terminals and manually run `py app.py` and `streamlit run dashboard.py`, this script uses Python's standard `subprocess` and `threading` libraries to run both processes simultaneously. It starts the Flask REST API on port 5000, starts the Streamlit dashboard on port 8501, and cleanly shuts down both background processes when you press `Ctrl + C`.
 
 ---
 
@@ -304,11 +290,11 @@ Here is a breakdown of each technical area along with a clear speaking script fo
 
 ---
 
-### Role 5: Testing, Data Storage and Failsafe Validation
-* Primary Files: `storage.py` and `test_system.py`
-* Core Concepts: CSV logging with `with open` context managers, 7-step unit testing, ESP32 autonomous offline failsafe.
+### Role 5: Data Storage and Autonomous Failsafe
+* Primary Files: `storage.py` and `hardware/`
+* Core Concepts: CSV logging with `with open` context managers, robust file error handling, ESP32 autonomous offline failsafe.
 * What you say to the examiner:
-  > "I handled data persistence, edge-case safety, and automated test validation. I implemented the CSV logging pipeline in `storage.py` using Python context managers (`with open`) to ensure telemetry records are saved safely without corruption. I also built `test_system.py`, which validates our mathematical formulas, hysteresis decisions, and API responses across 7 automated unit tests. In addition, I verified the ESP32 offline failsafe so that if network connectivity drops overnight, the microcontroller continues operating safely using internal autonomous thresholds."
+  > "I handled data persistence, edge-case safety, and system resilience. I implemented the CSV logging pipeline in `storage.py` using Python context managers (`with open`) to ensure telemetry records are saved safely without corruption or unclosed file handles. In addition, I verified the ESP32 offline failsafe so that if network connectivity drops or the laptop server disconnects overnight, the microcontroller continues operating safely using internal autonomous thresholds, ensuring the AC is never left stuck in an unsafe state."
 
 ---
 
@@ -316,26 +302,20 @@ Here is a breakdown of each technical area along with a clear speaking script fo
 
 Follow these simple steps in PowerShell or Command Prompt:
 
-Step 1: Open terminal in the project folder:
+Step 1: Install required packages:
 ```bash
-cd c:\Users\manee\Desktop\mdp
+py -m pip install -r requirements.txt
 ```
 
-Step 2: Run the automated verification test:
-```bash
-py test_system.py
-```
-You should see all 7 tests pass in under 1 second.
-
-Step 3: Launch the full system with one command:
+Step 2: Launch the full system with one command:
 ```bash
 py run_system.py
 ```
-This starts both the Flask API server and the Streamlit web dashboard.
+This starts both the Flask API server and the Streamlit web dashboard concurrently.
 
-Step 4: Open your browser to view the interface:
+Step 3: Open your browser to view the interface:
 * Web Dashboard: http://localhost:8501
 * Flask API Server: http://127.0.0.1:5000
 
-Step 5: Testing without hardware:
+Step 4: Testing without hardware:
 In the dashboard sidebar, adjust the "Your Preferred Temperature" slider or use the "Test Sensor Simulator" slider and click "Send Reading to Model". You will see the AC switch status and servo angle update live on screen.

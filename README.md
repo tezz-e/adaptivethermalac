@@ -45,8 +45,7 @@ The system is organized into modular subsystems with clean separation of respons
 | **Run-Time Analytics** | [`comfort_model.py`](comfort_model.py), [`dashboard.py`](dashboard.py) | **Cooling Run-Time Reduction:** Directly measured temperature dynamics cutting active cooling time by ~50% overnight, preventing 16 degree-hours of overcooling without guessing chiller tonnage. |
 | **Dashboard & Web API** | [`dashboard.py`](dashboard.py), [`app.py`](app.py) | **Presentation & Communication:** Streamlit Notion-style web dashboard, resident preference slider, and Flask REST API endpoints serving JSON decisions to the ESP32. |
 | **Hardware & Firmware** | [`hardware/`](hardware/) | **Embedded IoT Actuation:** ESP32 DevKit C++ firmware, DHT11 sensing on GPIO 4, and SG90 servo motor flipping the physical rocker switch safely without mains rewiring. |
-| **Data Persistence & Testing** | [`storage.py`](storage.py), [`test_system.py`](test_system.py) | **Storage & Quality Assurance:** CSV telemetry logging using `with open`, automated 7-step unit tests, and ESP32 offline failsafe. |
-
+| **Data Storage & Failsafe** | [`storage.py`](storage.py) | **Data Persistence & Offline Failsafe:** CSV telemetry logging using `with open` context managers and ESP32 offline autonomous failsafe. |
 ---
 
 ## 1. Project Overview & Problem Statement
@@ -102,14 +101,7 @@ Open PowerShell or Command Prompt in this folder and run:
 py -m pip install -r requirements.txt
 ```
 
-### Step 2: Verify the Code (Automated Tests)
-Run the 7-step automated test suite to confirm everything works:
-```bash
-py test_system.py
-```
-*(All 7 tests should complete in under 1 second with `OK`.)*
-
-### Step 3: Launch the Full System (1-Click)
+### Step 2: Launch the Full System (1-Click)
 ```bash
 py run_system.py
 ```
