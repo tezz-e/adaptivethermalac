@@ -32,8 +32,8 @@ Forcing complex class hierarchies with `__init__`, `super()`, and inheritance ad
 ```mermaid
 flowchart TD
     subgraph Data Structures
-        HD["Hostel State (dict)\n{room_id, temp, humidity, ac_state, servo_angle}"]
-        WD["Weather Data (dict)\n{temperature_c, humidity_pct, source}"]
+        HD["Hostel State dict<br/>room_id, temp, humidity, ac_state, servo_angle"]
+        WD["Weather Data dict<br/>temperature_c, humidity_pct, source"]
     end
 
     subgraph Pure Python Functions
@@ -44,9 +44,9 @@ flowchart TD
     end
 
     subgraph Outputs
-        SERVO["Servo Actuation Command (tuple)\n('OFF', 0, 'Reason')"]
-        SAVINGS["Run-Time Reduction (dict)\n{reduction_pct, degree_hours_avoided}"]
-        CSV["CSV Storage\n(hostel_telemetry.csv)"]
+        SERVO["Servo Actuation Command tuple<br/>OFF or ON, angle, reason"]
+        SAVINGS["Run-Time Reduction dict<br/>reduction_pct, degree_hours_avoided"]
+        CSV["CSV Storage<br/>hostel_telemetry.csv"]
     end
 
     WD --> F1
@@ -120,13 +120,14 @@ This was a deliberate and realistic engineering design decision based on physica
    * $T_{\text{outdoor}}$: Prevailing mean outdoor air temperature (°C), fetched live for the Vellore campus via Open-Meteo.
    * **80% Acceptability Limits:** $T_{\text{comf}} \pm 1.75^\circ\text{C}$ (Standard campus design tolerance).
 
-```mermaid
-xychart-beta
-    title "ASHRAE Adaptive Comfort Temperature vs Outdoor Temperature"
-    x-axis [15, 20, 25, 30, 35, 40]
-    y-axis "Optimal Comfort Temp (°C)" 20 --> 32
-    line [22.4, 24.0, 25.5, 27.1, 28.6, 30.2]
-```
+| Outdoor Temp (°C) | Optimal Comfort $T_{\text{comf}}$ (°C) | 80% Acceptable Band (°C) |
+| :---: | :---: | :---: |
+| 15.0°C | 22.4°C | 20.7°C – 24.2°C |
+| 20.0°C | 24.0°C | 22.2°C – 25.8°C |
+| 25.0°C | 25.5°C | 23.8°C – 27.3°C |
+| 30.0°C | 27.1°C | 25.3°C – 28.8°C |
+| 35.0°C | 28.6°C | 26.9°C – 30.4°C |
+| 40.0°C | 30.2°C | 28.4°C – 32.0°C |
 
 ---
 
@@ -215,9 +216,9 @@ stateDiagram-v2
 
 ```mermaid
 flowchart LR
-    ESP32["ESP32 DevKit\n(GPIO 18 PWM)"] -->|Pulse Width Modulation| SERVO["SG90 Micro Servo"]
-    SERVO -->|0° Position| OFF["Rocker Switch: OFF\n(AC Disengaged)"]
-    SERVO -->|90° Position| ON["Rocker Switch: ON\n(AC Engaged)"]
+    ESP32["ESP32 DevKit<br/>(GPIO 18 PWM)"] -->|Pulse Width Modulation| SERVO["SG90 Micro Servo"]
+    SERVO -->|0 deg Position| OFF["Rocker Switch: OFF<br/>(AC Disengaged)"]
+    SERVO -->|90 deg Position| ON["Rocker Switch: ON<br/>(AC Engaged)"]
 ```
 
 ---
@@ -246,13 +247,13 @@ void executeOfflineFailsafe(float temp) {
 #### 🎯 Answer:
 | Syllabus Topic | Concrete Code Location | Explanation |
 | :--- | :--- | :--- |
-| **Functions & Modules** | [`comfort_model.py`](file:///c:/Users/manee/Desktop/mdp/comfort_model.py) | Pure functions with type hints (`calculate_ashrae_comfort`) |
-| **Conditionals (if/elif/else)** | [`comfort_model.py`](file:///c:/Users/manee/Desktop/mdp/comfort_model.py#L75-L100) | 3-way hysteresis branch (`<= min`, `>= max`, deadband) |
-| **Lists, Dicts, Tuples** | [`app.py`](file:///c:/Users/manee/Desktop/mdp/app.py) | Structured state dicts; functions returning `Tuple[str, int, str]` |
-| **File Handling (CSV)** | [`storage.py`](file:///c:/Users/manee/Desktop/mdp/storage.py) | Context manager `with open(...)` appending CSV telemetry rows |
-| **Exception Handling (try/except)** | [`weather_service.py`](file:///c:/Users/manee/Desktop/mdp/weather_service.py#L40-L55) | `try-except` handling network drops with offline fallback |
-| **External APIs & Requests** | [`weather_service.py`](file:///c:/Users/manee/Desktop/mdp/weather_service.py#L35-L45) | `requests.get()` querying Open-Meteo live endpoint |
-| **Data Visualization** | [`dashboard.py`](file:///c:/Users/manee/Desktop/mdp/dashboard.py) | Interactive Plotly dual-band time-series graphs |
+| **Functions & Modules** | [`comfort_model.py`](comfort_model.py) | Pure functions with clear docstrings (`calculate_ashrae_comfort`) |
+| **Conditionals (if/elif/else)** | [`comfort_model.py`](comfort_model.py) | 3-way hysteresis branch (`<= min`, `>= max`, deadband) |
+| **Lists, Dicts, Tuples** | [`app.py`](app.py) | Structured state dicts; functions returning `(state, angle, reason)` tuples |
+| **File Handling (CSV)** | [`storage.py`](storage.py) | Context manager `with open(...)` appending CSV telemetry rows |
+| **Exception Handling (try/except)** | [`weather_service.py`](weather_service.py) | `try-except` handling network drops with offline fallback |
+| **External APIs & Requests** | [`weather_service.py`](weather_service.py) | `requests.get()` querying Open-Meteo live endpoint |
+| **Data Visualization** | [`dashboard.py`](dashboard.py) | Interactive Plotly dual-band time-series graphs |
 
 ---
 

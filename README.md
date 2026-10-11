@@ -1,45 +1,45 @@
-# ❄️ Adaptive Thermal Comfort AC Controller for Hostels
+# Adaptive Thermal Comfort AC Controller for Hostels
 ### BTech First Year Engineering Project | Vellore Campus
 
 > **A closed-loop physical IoT system:**
 > An ESP32 microcontroller with a DHT11 sensor monitors hostel room temperatures and mechanically actuates an **SG90 micro servo motor** to flip the physical AC rocker switch ON or OFF based on the **ASHRAE 55 Adaptive Comfort Model**, compensating for nighttime sleep metabolism and blanket insulation.
 
-> 📖 **Helpful Guides for the Team:**
-> * 🤝 [**Team Walkthrough & Beginner Guide (`TEAM_WALKTHROUGH.md`)**](file:///c:/Users/manee/Desktop/mdp/TEAM_WALKTHROUGH.md): Beginner-friendly explanation of every file, import, and role cheat sheets.
-> * 🤖 [**AI Onboarding Prompt (`AI_ONBOARDING_PROMPT.md`)**](file:///c:/Users/manee/Desktop/mdp/AI_ONBOARDING_PROMPT.md): Copy-paste prompt to have Claude/ChatGPT tutor any teammate one-on-one.
-> * 🎓 [**Review & Viva Q&A Guide (`PROJECT_VIVA_QA.md`)**](file:///c:/Users/manee/Desktop/mdp/PROJECT_VIVA_QA.md): Anticipated examiner questions, diagrams, and formula breakdowns.
+> **Helpful Guides for the Team:**
+> * [**Team Walkthrough & Beginner Guide (`TEAM_WALKTHROUGH.md`)**](TEAM_WALKTHROUGH.md): Beginner-friendly explanation of every file, import, and role cheat sheets.
+> * [**AI Onboarding Prompt (`AI_ONBOARDING_PROMPT.md`)**](AI_ONBOARDING_PROMPT.md): Copy-paste prompt to have Claude/ChatGPT tutor any teammate one-on-one.
+> * [**Review & Viva Q&A Guide (`PROJECT_VIVA_QA.md`)**](PROJECT_VIVA_QA.md): Anticipated examiner questions, diagrams, and formula breakdowns.
 
 ---
 
-## 📌 1. Project Overview & Problem Statement
+## 1. Project Overview & Problem Statement
 
 * **The Problem:** Most campus hostel AC units have binary on/off rocker switches with **zero thermostat and no remote control**. Left running overnight, rooms become uncomfortably cold (~19°C), causing sleep disruption, shivering under blankets, and massive wasted electricity.
 * **Why Focus Exclusively on Hostels (Not Classrooms):** Centralized campus classrooms use massive commercial chillers where accurate energy calculations require knowing chiller tonnage (TR), power ratings, airflow CFM, and real-time occupant counts — none of which are instrumented. In contrast, hostel rooms have decentralized binary AC units where a physical ESP32 retrofit directly solves a real overnight overcooling problem with verifiable physical hardware.
-* **Our Solution:** A lightweight Python system that fetches live outdoor weather for the Vellore campus, calculates real-time adaptive comfort thresholds with nighttime sleep compensation, and directly controls the physical AC switch via an ESP32 unit, while displaying live status and overnight electricity savings on a Notion-style web dashboard.
+* **Our Solution:** A lightweight Python system that fetches live outdoor weather for the Vellore campus, calculates real-time adaptive comfort thresholds with nighttime sleep compensation, and directly controls the physical AC switch via an ESP32 unit, while displaying live status and overnight cooling run-time reduction on a Notion-style web dashboard.
 
 ---
 
-## 🏗️ 2. System Architecture
+## 2. System Architecture
 
 ```mermaid
 flowchart TD
     subgraph Data Acquisition
-        API["Open-Meteo Weather API\n(Live Vellore Weather)"]
-        DHT["DHT11 Sensor\n(Room Temp & Humidity)"]
+        API["Open-Meteo Weather API<br/>(Live Vellore Weather)"]
+        DHT["DHT11 Sensor<br/>(Room Temp and Humidity)"]
     end
 
     subgraph Processing Engine
-        ASHRAE["ASHRAE Standard 55 Model\nT_comf = 17.8 + 0.31 * T_outdoor"]
-        SLEEP["Diurnal Sleep Offset\n(+1.0°C Night clo/met Adjustment)"]
-        HYST["Thermostat Hysteresis Logic\n(Prevents Compressor Chatter)"]
+        ASHRAE["ASHRAE Standard 55 Model<br/>T_comf = 17.8 + 0.31 * T_outdoor"]
+        SLEEP["Diurnal Sleep Offset<br/>(+1.0C Night clo and met Adjustment)"]
+        HYST["Thermostat Hysteresis Logic<br/>(Prevents Compressor Chatter)"]
     end
 
-    subgraph Hardware & Dashboard
-        ESP["ESP32 Microcontroller\n(WiFi HTTP Client)"]
-        SERVO["SG90 Servo Motor\n(Actuates Physical Switch: 0°/90°)"]
-        OLED["0.96\" OLED / LCD\n(On-Device Live Telemetry)"]
-        DASH["Streamlit Dashboard\n(Notion Minimalist UI)"]
-        CSV["CSV Storage\n(data/hostel_telemetry.csv)"]
+    subgraph Hardware and Dashboard
+        ESP["ESP32 Microcontroller<br/>(WiFi HTTP Client)"]
+        SERVO["SG90 Servo Motor<br/>(Actuates Physical Switch: 0 deg / 90 deg)"]
+        OLED["OLED or LCD Display<br/>(On-Device Live Telemetry)"]
+        DASH["Streamlit Dashboard<br/>(Notion Minimalist UI)"]
+        CSV["CSV Storage<br/>(data/hostel_telemetry.csv)"]
     end
 
     API --> ASHRAE
@@ -56,7 +56,7 @@ flowchart TD
 
 ---
 
-## ⚡ 3. Quick Start (Run in 60 Seconds)
+## 3. Quick Start (Run in 60 Seconds)
 
 ### Prerequisites
 - Python 3.10+ (tested on Python 3.13)
@@ -90,7 +90,7 @@ py simulate_esp32.py --interactive
 
 ---
 
-## 🔌 4. Hardware Unit Setup (BOM: ₹813)
+## 4. Hardware Unit Setup (BOM: ₹813)
 
 ### Bill of Materials
 | Component | Function | Approx Price (₹) |
@@ -123,7 +123,7 @@ py simulate_esp32.py --interactive
 
 ---
 
-## 📐 5. Thermal Comfort Science (ASHRAE Standard 55)
+## 5. Thermal Comfort Science (ASHRAE Standard 55)
 
 The adaptive comfort model establishes that human thermal comfort naturally shifts with outdoor temperatures:
 
@@ -141,7 +141,7 @@ $$T_{\text{comf}} = 17.8 + 0.31 \times T_{\text{outdoor}}$$
 
 ---
 
-## 🎓 6. Academic Syllabus Mapping (First-Year Python)
+## 6. Academic Syllabus Mapping (First-Year Python)
 
 | Syllabus Requirement | Project Implementation |
 | :--- | :--- |
@@ -155,7 +155,7 @@ $$T_{\text{comf}} = 17.8 + 0.31 \times T_{\text{outdoor}}$$
 
 ---
 
-## 👥 7. Team Division of Work
+## 7. Team Division of Work
 
 | Team Member | Core Responsibility |
 | :--- | :--- |
