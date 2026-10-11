@@ -247,13 +247,13 @@ void executeOfflineFailsafe(float temp) {
 #### 🎯 Answer:
 | Syllabus Topic | Concrete Code Location | Explanation |
 | :--- | :--- | :--- |
-| **Functions & Modules** | [`comfort_model.py`](comfort_model.py) | Pure functions with clear docstrings (`calculate_ashrae_comfort`) |
-| **Conditionals (if/elif/else)** | [`comfort_model.py`](comfort_model.py) | 3-way hysteresis branch (`<= min`, `>= max`, deadband) |
-| **Lists, Dicts, Tuples** | [`app.py`](app.py) | Structured state dicts; functions returning `(state, angle, reason)` tuples |
-| **File Handling (CSV)** | [`storage.py`](storage.py) | Context manager `with open(...)` appending CSV telemetry rows |
-| **Exception Handling (try/except)** | [`weather_service.py`](weather_service.py) | `try-except` handling network drops with offline fallback |
-| **External APIs & Requests** | [`weather_service.py`](weather_service.py) | `requests.get()` querying Open-Meteo live endpoint |
-| **Data Visualization** | [`dashboard.py`](dashboard.py) | Interactive Plotly dual-band time-series graphs |
+| **Functions & Modules** | [`comfort_model.py`](../comfort_model.py) | Pure functions with clear docstrings (`calculate_ashrae_comfort`) |
+| **Conditionals (if/elif/else)** | [`comfort_model.py`](../comfort_model.py) | 3-way hysteresis branch (`<= min`, `>= max`, deadband) |
+| **Lists, Dicts, Tuples** | [`app.py`](../app.py) | Structured state dicts; functions returning `(state, angle, reason)` tuples |
+| **File Handling (CSV)** | [`storage.py`](../storage.py) | Context manager `with open(...)` appending CSV telemetry rows |
+| **Exception Handling (try/except)** | [`weather_service.py`](../weather_service.py) | `try-except` handling network drops with offline fallback |
+| **External APIs & Requests** | [`weather_service.py`](../weather_service.py) | `requests.get()` querying Open-Meteo live endpoint |
+| **Data Visualization** | [`dashboard.py`](../dashboard.py) | Interactive Plotly dual-band time-series graphs |
 
 ---
 

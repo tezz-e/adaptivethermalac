@@ -5,9 +5,9 @@
 > An ESP32 microcontroller with a DHT11 sensor monitors hostel room temperatures and mechanically actuates an **SG90 micro servo motor** to flip the physical AC rocker switch ON or OFF based on the **ASHRAE 55 Adaptive Comfort Model**, compensating for nighttime sleep metabolism and blanket insulation.
 
 > **Helpful Guides for the Team:**
-> * [**Team Walkthrough & Beginner Guide (`TEAM_WALKTHROUGH.md`)**](TEAM_WALKTHROUGH.md): Beginner-friendly explanation of every file, import, and role cheat sheets.
-> * [**AI Onboarding Prompt (`AI_ONBOARDING_PROMPT.md`)**](AI_ONBOARDING_PROMPT.md): Copy-paste prompt to have Claude/ChatGPT tutor any teammate one-on-one.
-> * [**Review & Viva Q&A Guide (`PROJECT_VIVA_QA.md`)**](PROJECT_VIVA_QA.md): Anticipated examiner questions, diagrams, and formula breakdowns.
+> * [**Team Walkthrough & Beginner Guide (`docs/TEAM_WALKTHROUGH.md`)**](docs/TEAM_WALKTHROUGH.md): Beginner-friendly explanation of every file, import, and role cheat sheets.
+> * [**AI Onboarding Prompt (`docs/AI_ONBOARDING_PROMPT.md`)**](docs/AI_ONBOARDING_PROMPT.md): Copy-paste prompt to have Claude/ChatGPT tutor any teammate one-on-one.
+> * [**Review & Viva Q&A Guide (`docs/PROJECT_VIVA_QA.md`)**](docs/PROJECT_VIVA_QA.md): Anticipated examiner questions, diagrams, and formula breakdowns.
 
 ---
 

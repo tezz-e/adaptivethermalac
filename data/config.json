@@ -1,8 +1,0 @@
-{
-    "campus_name": "Vellore Campus",
-    "default_hostel_room": "HOSTEL_D_312",
-    "hysteresis_buffer_c": 0.5,
-    "night_mode_auto": true,
-    "classroom_default_fixed_setpoint": 20.0,
-    "created_at": "2026-10-11"
-}
