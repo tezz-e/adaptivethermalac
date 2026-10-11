@@ -19,7 +19,7 @@
 
 ### Q1. Why did you use Functions, Dictionaries, and Lists instead of complex Object-Oriented Programming (OOP)?
 
-#### 🎯 Answer:
+#### Answer:
 In a First-Year Python curriculum, the academic objective is mastering fundamental computational concepts:
 * **Pure Functions** (`def`) for modular, reusable algorithms.
 * **Dictionaries** (`{}`) and **Lists** (`[]`) for structured data storage (matching JSON API payloads).
@@ -61,7 +61,7 @@ flowchart TD
 
 ### Q2. Why did you use Flask and Streamlit together instead of just one?
 
-#### 🎯 Answer:
+#### Answer:
 This is a standard **Separation of Concerns (SoC)** architectural pattern:
 1. **Flask (Headless REST API Backend):**
    - Microcontrollers like the ESP32 require ultra-fast, lightweight JSON endpoints (`POST /api/hostel/telemetry`).
@@ -76,7 +76,7 @@ This is a standard **Separation of Concerns (SoC)** architectural pattern:
 
 ### Q3. Why did you focus exclusively on hostel ACs instead of campus classrooms? (EXAMINER FAVORITE)
 
-#### 🎯 Answer:
+#### Answer:
 This was a deliberate and realistic engineering design decision based on physical and technical feasibility:
 
 1. **Centralized HVAC Complexity (Tonnage & Occupancy):**
@@ -95,7 +95,7 @@ This was a deliberate and realistic engineering design decision based on physica
 
 ### Q4. What is ASHRAE, and why are we using the Standard 55 Adaptive Comfort Model instead of a fixed 24°C?
 
-#### 🎯 Answer:
+#### Answer:
 1. **What Does ASHRAE Stand For?**
    - **ASHRAE** stands for the **American Society of Heating, Refrigerating and Air-Conditioning Engineers**.
    - Founded in 1894, it is the premier international scientific organization that establishes the global engineering standards for building HVAC, ventilation, and indoor air quality.
@@ -131,7 +131,7 @@ This was a deliberate and realistic engineering design decision based on physica
 
 ### Q5. Why is the recommended temperature higher in a hostel room at night?
 
-#### 🎯 Answer:
+#### Answer:
 During the night (22:00 to 07:00), human thermoregulation changes significantly:
 1. **Lower Metabolic Heat Production ($M$):** Drops from $\approx 1.0\text{ met}$ (awake) to $\approx 0.7\text{ met}$ (basal metabolic rate during sleep). The body generates 30% less internal heat.
 2. **Higher Clothing/Bedding Insulation ($I_{cl}$):** Increases from $0.5\text{ clo}$ (shorts/t-shirt) to $1.2 - 1.5\text{ clo}$ (sleepwear plus blankets/quilts).
@@ -142,7 +142,7 @@ During the night (22:00 to 07:00), human thermoregulation changes significantly:
 
 ### Q6. How do you evaluate performance when the hostel AC is centralized and you don't know the chiller electrical specs?
 
-#### 🎯 Answer:
+#### Answer:
 Because our hostel cooling is supplied by a centralized campus system, residents do not have access to backend chiller tonnage (TR), power ratings (kW), or compressor COP. Guessing electrical wattage without instruments would be speculative and bad engineering!
 
 Instead, our system evaluates performance based on **direct physical measurements (temperature and time)**:
@@ -159,7 +159,7 @@ Instead, our system evaluates performance based on **direct physical measurement
 
 ### Q7. How does the system handle individual resident preferences?
 
-#### 🎯 Answer:
+#### Answer:
 In real life, thermal comfort is subjective — some residents feel warm easily while others feel chilly.
 Our system allows the resident to dial in their **Preferred Room Target Temperature** on the dashboard sidebar (e.g., 24.5°C):
 * **Default Setting:** Automatically defaults to the scientific ASHRAE adaptive weather target (~25.0°C).
@@ -172,7 +172,7 @@ Our system allows the resident to dial in their **Preferred Room Target Temperat
 
 ### Q8. What is Hysteresis (Deadband), and why is it needed for an AC switch?
 
-#### 🎯 Answer:
+#### Answer:
 Without hysteresis, if the target temperature is $26.0^\circ\text{C}$, the system would rapidly cycle:
 * Temp reaches $26.1^\circ\text{C}$ $\rightarrow$ AC switches ON.
 * Temp cools to $25.9^\circ\text{C}$ in 30 seconds $\rightarrow$ AC switches OFF.
@@ -180,7 +180,7 @@ Without hysteresis, if the target temperature is $26.0^\circ\text{C}$, the syste
 
 This phenomenon is called **compressor hunting / chatter**, which burns out relay switches and damages compressor motors.
 
-#### 🔄 Hysteresis State Transition:
+#### Hysteresis State Transition:
 ```mermaid
 stateDiagram-v2
     [*] --> AC_OFF
@@ -207,7 +207,7 @@ stateDiagram-v2
 
 ### Q9. Why use an SG90 Servo motor to flip the switch instead of an internal relay?
 
-#### 🎯 Answer:
+#### Answer:
 1. **Zero High-Voltage AC Tampering (Safety):** Hostels and rented rooms strictly prohibit splicing or rewiring 230V mains switchboards. Relays carry electrical shock and fire hazards for student prototypes.
 2. **Non-Invasive Universal Retrofit:** An SG90 servo mounts externally on the existing switch plate using adhesive tape or a 3D-printed bracket. It mechanically pushes the physical rocker switch just like a human finger.
 3. **Reversibility:** When moving out or in emergencies, the servo unit can be unclipped without leaving any damage or wiring trace.
@@ -223,7 +223,7 @@ flowchart LR
 
 ### Q10. What happens if WiFi drops or the backend laptop crashes while residents are asleep?
 
-#### 🎯 Answer:
+#### Answer:
 The ESP32 firmware contains an **Autonomous Local Failsafe**:
 ```cpp
 void executeOfflineFailsafe(float temp) {
@@ -242,7 +242,7 @@ void executeOfflineFailsafe(float temp) {
 
 ### Q11. How does this codebase reflect first-year Python syllabus topics?
 
-#### 🎯 Answer:
+#### Answer:
 | Syllabus Topic | Concrete Code Location | Explanation |
 | :--- | :--- | :--- |
 | **Functions & Modules** | [`comfort_model.py`](../comfort_model.py) | Pure functions with clear docstrings (`calculate_ashrae_comfort`) |
@@ -259,7 +259,7 @@ void executeOfflineFailsafe(float temp) {
 
 ### Q12. What are the limitations of this prototype?
 
-#### 🎯 Answer:
+#### Answer:
 1. **DHT11 Sensor Accuracy:** The DHT11 has an accuracy of $\pm 2.0^\circ\text{C}$ and $1\text{ Hz}$ sampling rate. Upgrading to a **DHT22** or **BME280** ($\pm 0.5^\circ\text{C}$ accuracy) would provide tighter precision.
 2. **Binary Control Only:** The servo can only toggle full power ON or OFF. It cannot adjust fan speeds or compressor inverter percentages.
 
@@ -267,6 +267,6 @@ void executeOfflineFailsafe(float temp) {
 
 ### Q13. If you had 6 more months to scale this, what would you add?
 
-#### 🎯 Answer:
+#### Answer:
 1. **Infrared (IR) Blaster Integration:** Replace the physical servo motor with an IR LED transmitter on the ESP32 that sends native remote-control signals (adjusting setpoint, mode, and fan speed directly).
 2. **MQTT Protocol / Micro-mesh:** Transition from HTTP polling to an MQTT broker (like Mosquitto) to enable instant publish-subscribe telemetry for hundreds of hostel rooms with minimal bandwidth.
