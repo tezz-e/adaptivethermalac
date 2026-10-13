@@ -185,44 +185,44 @@ with tab_hostel:
     with ctrl_col2:
         mode_options = ["Automatic (ASHRAE)", "Manual Override ON (90°)", "Manual Override OFF (0°)"]
 
-        # Compute which radio option index matches the current state (for default selection)
-        current_idx = 0 if not hostel_room["manual_override"] else (1 if hostel_room["override_state"] == "ON" else 2)
-        mode_selection = st.radio("AC Operating Mode", options=mode_options, index=current_idx, horizontal=True)
+        def handle_mode_change():
+            selected = st.session_state.get("ac_mode_radio")
+            if selected == "Manual Override ON (90°)":
+                mode = "ON"
+            elif selected == "Manual Override OFF (0°)":
+                mode = "OFF"
+            else:
+                mode = "AUTO"
 
-        # Save what override state looked like before this re-run (to detect actual changes)
-        prev_override = (hostel_room["manual_override"], hostel_room["override_state"])
-
-        if mode_selection == "Automatic (ASHRAE)":
-            hostel_room["manual_override"] = False
-            hostel_room["override_state"]  = None
-            api_mode = "AUTO"
-        elif mode_selection == "Manual Override ON (90°)":
-            hostel_room["manual_override"] = True
-            hostel_room["override_state"]  = "ON"
-            hostel_room["ac_state"]        = "ON"
-            hostel_room["servo_angle"]     = 90
-            api_mode = "ON"
-        else:
-            hostel_room["manual_override"] = True
-            hostel_room["override_state"]  = "OFF"
-            hostel_room["ac_state"]        = "OFF"
-            hostel_room["servo_angle"]     = 0
-            api_mode = "OFF"
-
-        # Only POST to Flask if the override actually changed this re-run
-        if (hostel_room["manual_override"], hostel_room["override_state"]) != prev_override:
             try:
                 r = requests.post(
                     f"http://127.0.0.1:{config.FLASK_PORT}/api/hostel/override",
-                    json={"mode": api_mode},
-                    timeout=0.4
+                    json={"mode": mode},
+                    timeout=1.5
                 )
                 if r.status_code == 200:
-                    res_data = r.json()
-                    hostel_room["ac_state"]    = res_data.get("ac_state",    hostel_room["ac_state"])
-                    hostel_room["servo_angle"] = res_data.get("servo_angle", hostel_room["servo_angle"])
+                    data = r.json()
+                    hostel_room["manual_override"] = (mode in ("ON", "OFF"))
+                    hostel_room["override_state"]  = mode if mode in ("ON", "OFF") else None
+                    hostel_room["ac_state"]        = data.get("ac_state", mode if mode in ("ON", "OFF") else hostel_room["ac_state"])
+                    hostel_room["servo_angle"]     = data.get("servo_angle", 90 if mode == "ON" else (0 if mode == "OFF" else hostel_room["servo_angle"]))
             except Exception:
                 pass
+
+        # Compute initial selection index based on current room state if not already set
+        if "ac_mode_radio" not in st.session_state:
+            default_idx = 0
+            if hostel_room.get("manual_override"):
+                default_idx = 1 if hostel_room.get("override_state") == "ON" else 2
+            st.session_state["ac_mode_radio"] = mode_options[default_idx]
+
+        st.radio(
+            "AC Operating Mode",
+            options=mode_options,
+            key="ac_mode_radio",
+            on_change=handle_mode_change,
+            horizontal=True
+        )
 
     st.divider()   # draws a horizontal line separator
 

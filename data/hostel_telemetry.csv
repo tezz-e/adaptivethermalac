@@ -845,3 +845,97 @@ timestamp,room_id,current_temp,current_humidity,target_optimal,comfort_min,comfo
 2026-10-13 11:44:18,HOSTEL_D_312,26.5,92.0,25.0,23.5,26.5,OFF,0,Capacitive touch button override on GPIO 10 (OFF).
 2026-10-13 11:44:21,HOSTEL_D_312,26.1,92.0,25.0,23.5,26.5,OFF,0,Capacitive touch button override on GPIO 10 (OFF).
 2026-10-13 11:44:23,HOSTEL_D_312,26.1,92.0,25.0,23.5,26.5,OFF,0,Capacitive touch button override on GPIO 10 (OFF).
+2026-10-13 13:56:19,HOSTEL_D_312,24.7,81.0,25.0,23.5,26.5,OFF,0,Room temp (24.7°C) is inside comfort band [23.5 – 26.5°C]. AC stays OFF.
+2026-10-13 13:56:21,HOSTEL_D_312,24.7,81.0,25.0,23.5,26.5,OFF,0,Capacitive touch button override on GPIO 10 (OFF).
+2026-10-13 13:56:25,HOSTEL_D_312,24.9,80.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:56:27,HOSTEL_D_312,24.8,81.0,25.0,23.5,26.5,OFF,0,Capacitive touch button override on GPIO 10 (OFF).
+2026-10-13 13:56:30,HOSTEL_D_312,24.8,80.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:56:32,HOSTEL_D_312,25.0,83.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:56:35,HOSTEL_D_312,24.9,81.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:56:37,HOSTEL_D_312,24.9,81.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:56:40,HOSTEL_D_312,25.1,81.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:56:42,HOSTEL_D_312,24.8,80.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:56:45,HOSTEL_D_312,24.9,81.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:56:47,HOSTEL_D_312,24.9,81.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:56:50,HOSTEL_D_312,25.0,80.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:56:52,HOSTEL_D_312,24.9,80.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:56:55,HOSTEL_D_312,24.8,80.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:56:57,HOSTEL_D_312,24.7,80.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:57:00,HOSTEL_D_312,25.0,80.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:57:02,HOSTEL_D_312,24.8,80.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:57:05,HOSTEL_D_312,24.8,80.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:57:07,HOSTEL_D_312,24.9,80.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:57:10,HOSTEL_D_312,24.6,80.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:57:12,HOSTEL_D_312,24.9,80.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:57:15,HOSTEL_D_312,24.8,80.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:57:17,HOSTEL_D_312,24.8,80.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:57:20,HOSTEL_D_312,24.8,80.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:57:22,HOSTEL_D_312,24.7,82.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:57:25,HOSTEL_D_312,24.7,80.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:57:27,HOSTEL_D_312,24.7,81.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:57:30,HOSTEL_D_312,24.9,80.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:57:32,HOSTEL_D_312,24.7,80.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:57:35,HOSTEL_D_312,24.7,80.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:57:37,HOSTEL_D_312,24.9,80.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:57:40,HOSTEL_D_312,24.8,81.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:57:42,HOSTEL_D_312,24.7,80.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:57:45,HOSTEL_D_312,24.9,81.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:57:47,HOSTEL_D_312,24.5,80.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:57:50,HOSTEL_D_312,24.9,80.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:57:52,HOSTEL_D_312,24.7,81.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:57:55,HOSTEL_D_312,25.0,81.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:57:57,HOSTEL_D_312,24.6,81.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:58:00,HOSTEL_D_312,24.5,80.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:58:02,HOSTEL_D_312,24.7,80.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:58:05,HOSTEL_D_312,24.5,81.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:58:07,HOSTEL_D_312,24.5,80.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:58:10,HOSTEL_D_312,25.0,81.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:58:12,HOSTEL_D_312,24.5,81.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:58:15,HOSTEL_D_312,24.6,81.0,25.0,23.5,26.5,OFF,0,Capacitive touch button override on GPIO 10 (OFF).
+2026-10-13 13:58:17,HOSTEL_D_312,24.5,89.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:58:20,HOSTEL_D_312,24.5,85.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:58:22,HOSTEL_D_312,26.7,89.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 13:58:31,HOSTEL_D_312,28.5,87.0,25.0,23.5,26.5,ON,90,Room temp (28.5°C) reached upper limit (26.5°C). AC switched ON.
+2026-10-13 13:58:34,HOSTEL_D_312,24.6,75.0,25.0,23.5,26.5,ON,90,Room temp (24.6°C) is inside comfort band [23.5 – 26.5°C]. AC stays ON.
+2026-10-13 13:58:36,HOSTEL_D_312,25.5,84.0,25.0,23.5,26.5,ON,90,Room temp (25.5°C) is inside comfort band [23.5 – 26.5°C]. AC stays ON.
+2026-10-13 13:58:39,HOSTEL_D_312,26.1,86.0,25.0,23.5,26.5,ON,90,Room temp (26.1°C) is inside comfort band [23.5 – 26.5°C]. AC stays ON.
+2026-10-13 13:58:41,HOSTEL_D_312,25.4,84.0,25.0,23.5,26.5,ON,90,Room temp (25.4°C) is inside comfort band [23.5 – 26.5°C]. AC stays ON.
+2026-10-13 13:58:56,HOSTEL_D_312,24.5,74.0,25.0,23.5,26.5,ON,90,Room temp (24.5°C) is inside comfort band [23.5 – 26.5°C]. AC stays ON.
+2026-10-13 13:59:01,HOSTEL_D_312,24.5,81.0,25.0,23.5,26.5,ON,90,Room temp (24.5°C) is inside comfort band [23.5 – 26.5°C]. AC stays ON.
+2026-10-13 13:59:03,HOSTEL_D_312,24.8,80.0,25.0,23.5,26.5,ON,90,Room temp (24.8°C) is inside comfort band [23.5 – 26.5°C]. AC stays ON.
+2026-10-13 13:59:06,HOSTEL_D_312,24.6,80.0,25.0,23.5,26.5,ON,90,Room temp (24.6°C) is inside comfort band [23.5 – 26.5°C]. AC stays ON.
+2026-10-13 13:59:08,HOSTEL_D_312,24.5,80.0,25.0,23.5,26.5,ON,90,Room temp (24.5°C) is inside comfort band [23.5 – 26.5°C]. AC stays ON.
+2026-10-13 13:59:11,HOSTEL_D_312,24.7,80.0,25.0,23.5,26.5,ON,90,Room temp (24.7°C) is inside comfort band [23.5 – 26.5°C]. AC stays ON.
+2026-10-13 13:59:13,HOSTEL_D_312,24.7,80.0,25.0,23.5,26.5,ON,90,Room temp (24.7°C) is inside comfort band [23.5 – 26.5°C]. AC stays ON.
+2026-10-13 13:59:16,HOSTEL_D_312,24.9,80.0,25.0,23.5,26.5,ON,90,Room temp (24.9°C) is inside comfort band [23.5 – 26.5°C]. AC stays ON.
+2026-10-13 13:59:18,HOSTEL_D_312,24.7,80.0,25.0,23.5,26.5,ON,90,Room temp (24.7°C) is inside comfort band [23.5 – 26.5°C]. AC stays ON.
+2026-10-13 13:59:21,HOSTEL_D_312,24.7,80.0,25.0,23.5,26.5,ON,90,Room temp (24.7°C) is inside comfort band [23.5 – 26.5°C]. AC stays ON.
+2026-10-13 13:59:23,HOSTEL_D_312,24.6,80.0,25.0,23.5,26.5,ON,90,Room temp (24.6°C) is inside comfort band [23.5 – 26.5°C]. AC stays ON.
+2026-10-13 13:59:26,HOSTEL_D_312,25.5,80.0,25.0,23.5,26.5,ON,90,Room temp (25.5°C) is inside comfort band [23.5 – 26.5°C]. AC stays ON.
+2026-10-13 13:59:28,HOSTEL_D_312,25.0,72.0,25.0,23.5,26.5,OFF,0,Manual override active (OFF).
+2026-10-13 13:59:47,HOSTEL_D_312,24.5,74.0,25.0,23.5,26.5,OFF,0,Manual override active (OFF).
+2026-10-13 13:59:49,HOSTEL_D_312,24.7,74.0,25.0,23.5,26.5,OFF,0,Capacitive touch button override on GPIO 10 (OFF).
+2026-10-13 13:59:52,HOSTEL_D_312,24.4,81.0,25.0,23.5,26.5,OFF,0,Capacitive touch button override on GPIO 10 (OFF).
+2026-10-13 14:00:13,HOSTEL_D_312,24.0,74.0,25.0,23.5,26.5,OFF,0,Manual override active (OFF).
+2026-10-13 14:00:14,HOSTEL_D_312,24.3,75.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 14:00:16,HOSTEL_D_312,24.0,74.0,25.0,23.5,26.5,OFF,0,Manual override active (OFF).
+2026-10-13 14:00:37,HOSTEL_D_312,24.7,74.0,25.0,23.5,26.5,OFF,0,Capacitive touch button override on GPIO 10 (OFF).
+2026-10-13 14:00:40,HOSTEL_D_312,24.5,79.0,25.0,23.5,26.5,OFF,0,Capacitive touch button override on GPIO 10 (OFF).
+2026-10-13 14:00:43,HOSTEL_D_312,25.5,80.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 14:00:45,HOSTEL_D_312,25.5,81.0,25.0,23.5,26.5,OFF,0,Capacitive touch button override on GPIO 10 (OFF).
+2026-10-13 14:00:48,HOSTEL_D_312,24.3,82.0,25.0,23.5,26.5,OFF,0,Capacitive touch button override on GPIO 10 (OFF).
+2026-10-13 14:00:51,HOSTEL_D_312,24.7,86.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 14:00:53,HOSTEL_D_312,21.7,79.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 14:00:56,HOSTEL_D_312,26.1,85.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 14:00:58,HOSTEL_D_312,24.8,83.0,25.0,23.5,26.5,ON,90,Capacitive touch button override on GPIO 10 (ON).
+2026-10-13 14:01:01,HOSTEL_D_312,25.6,83.0,25.0,23.5,26.5,OFF,0,Capacitive touch button override on GPIO 10 (OFF).
+2026-10-13 14:01:03,HOSTEL_D_312,24.5,83.0,25.0,23.5,26.5,OFF,0,Capacitive touch button override on GPIO 10 (OFF).
+2026-10-13 14:01:06,HOSTEL_D_312,24.6,80.0,25.0,23.5,26.5,OFF,0,Capacitive touch button override on GPIO 10 (OFF).
+2026-10-13 14:01:08,HOSTEL_D_312,24.4,80.0,25.0,23.5,26.5,OFF,0,Capacitive touch button override on GPIO 10 (OFF).
+2026-10-13 14:01:11,HOSTEL_D_312,24.4,80.0,25.0,23.5,26.5,OFF,0,Capacitive touch button override on GPIO 10 (OFF).
+2026-10-13 14:01:13,HOSTEL_D_312,24.5,80.0,25.0,23.5,26.5,OFF,0,Capacitive touch button override on GPIO 10 (OFF).
+2026-10-13 14:01:16,HOSTEL_D_312,24.6,80.0,25.0,23.5,26.5,OFF,0,Capacitive touch button override on GPIO 10 (OFF).
+2026-10-13 14:01:18,HOSTEL_D_312,24.4,80.0,25.0,23.5,26.5,OFF,0,Capacitive touch button override on GPIO 10 (OFF).
+2026-10-13 14:01:21,HOSTEL_D_312,24.4,80.0,25.0,23.5,26.5,OFF,0,Capacitive touch button override on GPIO 10 (OFF).
+2026-10-13 14:06:41,HOSTEL_D_312,22.0,50.0,25.0,23.5,26.5,ON,90,Manual override active (ON).
+2026-10-13 14:06:50,HOSTEL_D_312,30.0,50.0,25.0,23.5,26.5,OFF,0,Manual override active (OFF).

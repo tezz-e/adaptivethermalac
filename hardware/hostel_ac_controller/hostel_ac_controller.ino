@@ -646,9 +646,9 @@ void loop() {
           comfortMin            = resDoc["comfort_min"] | 23.5;
           comfortMax            = resDoc["comfort_max"] | 26.5;
 
-          if (!manualTouchOverride) {
-            setAcSwitch(targetAngle, backendAcState);
-          }
+          // Obey backend command (both automatic ASHRAE comfort and dashboard manual override)
+          setAcSwitch(targetAngle, backendAcState);
+          manualTouchOverride = false;
         }
       } else {
         isServerConnected = false;

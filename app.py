@@ -144,20 +144,20 @@ def process_incoming_reading(room_temp, room_humidity, sensor_source="LIVE_DHT11
     prev_ac_state = hostel_room_state.get("ac_state", "OFF")
 
     # Step 3: Decide ON/OFF using the override priority chain
-    if touch_override and esp_ac_state in ("ON", "OFF"):
-        # Physical button was pressed — obey the ESP32's own toggle, don't override it
-        ac_state    = esp_ac_state
-        servo_angle = int(esp_servo_angle) if esp_servo_angle is not None else (90 if ac_state == "ON" else 0)
-        reason      = f"Capacitive touch button override on GPIO 10 ({ac_state})."
-
-    elif hostel_room_state["manual_override"] and hostel_room_state["override_state"] in ("ON", "OFF"):
-        # Dashboard radio button is forcing a specific state
+    # Dashboard manual override (highest priority: explicit user command from web dashboard)
+    if hostel_room_state["manual_override"] and hostel_room_state["override_state"] in ("ON", "OFF"):
         ac_state    = hostel_room_state["override_state"]
         servo_angle = config.SERVO_ON_ANGLE if ac_state == "ON" else config.SERVO_OFF_ANGLE
         reason      = f"Manual override active ({ac_state})."
 
+    # Physical button pressed on the unit (secondary priority: local touch toggle)
+    elif touch_override and esp_ac_state in ("ON", "OFF"):
+        ac_state    = esp_ac_state
+        servo_angle = int(esp_servo_angle) if esp_servo_angle is not None else (90 if ac_state == "ON" else 0)
+        reason      = f"Capacitive touch button override on GPIO 10 ({ac_state})."
+
+    # Automatic ASHRAE hysteresis (default: intelligent temperature control)
     else:
-        # Automatic ASHRAE hysteresis — let the comfort model decide
         ac_state, servo_angle, reason = comfort_model.evaluate_hostel_ac_decision(
             room_temp=room_temp,
             min_temp=band["min_temp"],
