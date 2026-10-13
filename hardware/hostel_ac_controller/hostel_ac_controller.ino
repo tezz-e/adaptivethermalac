@@ -2,13 +2,53 @@
  * ======================================================================================
  * Project: Adaptive Thermal Comfort Advisory & Control System for Campus Hostels
  * Component: ESP32-S3 Firmware for Hostel AC Physical Control Unit
- * 
+ *
+ * --------------------------------------------------------------------------------------
+ * NOTE FOR PYTHON STUDENTS: This file is NOT Python.
+ * --------------------------------------------------------------------------------------
+ * This file is written in C++ and uses the Arduino framework. It runs directly ON the
+ * ESP32-S3 microcontroller chip — not on a laptop. You upload it using the Arduino IDE
+ * or PlatformIO, not by running "python" in a terminal.
+ *
+ * Key differences from Python you will notice:
+ *   - Every statement ends with a semicolon ;
+ *   - Variable types must be declared (e.g. "int", "float", "bool", "String")
+ *     unlike Python where you just write  x = 5
+ *   - Comments use  // for single-line  and  /* ... * /  for multi-line blocks
+ *   - There are no classes in our Python code, but C++ uses them everywhere
+ *
+ * How an Arduino/ESP32 program is structured (always two mandatory functions):
+ *
+ *   void setup()  — runs ONCE when the chip is powered on or reset.
+ *                   Used to initialise hardware: serial port, WiFi, sensors, servo.
+ *                   Think of it like the code at the top of a Python script before
+ *                   any loop.
+ *
+ *   void loop()   — runs FOREVER in an infinite loop after setup() finishes.
+ *                   This is called automatically by the Arduino framework ~60 times
+ *                   per second. It is equivalent to:
+ *                       while True:
+ *                           check_touch_button()
+ *                           read_dht11()
+ *                           send_to_flask()
+ *                           update_oled()
+ *
+ * What each #include library does (like Python's "import"):
+ *   Arduino.h    — core Arduino functions: pinMode, digitalWrite, delay, millis
+ *   Wire.h       — I2C communication protocol (used to talk to the OLED display)
+ *   WiFi.h       — connects the ESP32 to a WiFi network (our mobile hotspot)
+ *   WiFiUdp.h    — UDP networking (used for auto-discovery broadcast to find laptop IP)
+ *   HTTPClient.h — sends HTTP POST requests to the Flask server (like requests.post in Python)
+ *   DHT.h        — reads temperature and humidity from the DHT11 sensor on GPIO 4
+ *   ArduinoJson.h — parses and builds JSON strings (like Python's json.loads / json.dumps)
+ *   U8g2lib.h    — draws text and graphics on the 1.3" SH1106 OLED display
+ *
  * Hardware Setup (ESP32-S3-DevKitC-1 N16R8):
- * - Microcontroller: ESP32-S3-DevKitC-1 (16MB Flash, 8MB PSRAM)
- * - OLED Display: 1.3" / 0.96" I2C SH1106 128x64 (SDA -> GPIO 8, SCL -> GPIO 9)
- * - DHT11 Temperature & Humidity Sensor (Data pin -> GPIO 4, VCC -> 3V3, GND -> GND)
- * - SG90 Micro Servo Motor (Signal pin -> GPIO 18, VCC -> 5V/VIN, GND -> GND)
- * - Capacitive Touch Button (SIG/Touch pin -> GPIO 10, VCC -> 3V3, GND -> GND)
+ *   - Microcontroller : ESP32-S3-DevKitC-1 (16MB Flash, 8MB PSRAM)
+ *   - OLED Display    : 1.3" SH1106 128x64 (SDA -> GPIO 8, SCL -> GPIO 9)
+ *   - DHT11 Sensor    : Data pin -> GPIO 4, VCC -> 3.3V, GND -> GND
+ *   - SG90 Servo      : Signal -> GPIO 18, VCC -> 5V (external adapter), GND -> shared GND
+ *   - Touch Button    : SIG -> GPIO 10, VCC -> 3.3V, GND -> GND
  * ======================================================================================
  */
 
