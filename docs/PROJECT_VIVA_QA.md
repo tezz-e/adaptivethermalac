@@ -1,272 +1,180 @@
 # Project Review & Viva Q&A Guide
 ### Adaptive Thermal Comfort AC Controller for Campus Hostels
-**Project Type:** IoT Adaptive Thermal Comfort Advisory & Control System
+
+**Target Audience:** Teammates preparing for examiner questions during tomorrow's project review.  
+All answers are written in **simple, direct English** with **no broken math symbols or confusing diagram code**.
 
 ---
 
-## Table of Contents
-1. [Software Architecture & Syllabus-Aligned Design](#1-software-architecture--syllabus-aligned-design)
-2. [Scope Justification: Why Hostels Over Classrooms?](#2-scope-justification-why-hostels-over-classrooms)
-3. [Thermal Physics & ASHRAE Standard 55](#3-thermal-physics--ashrae-standard-55)
-4. [Control Systems & Hysteresis Logic](#4-control-systems--hysteresis-logic)
-5. [Hardware, ESP32 & IoT Engineering](#5-hardware-esp32--iot-engineering)
-6. [Python Syllabus & Concepts Mapping](#6-python-syllabus--concepts-mapping)
-7. [Edge Cases, Limitations & Future Scope](#7-edge-cases-limitations--future-scope)
+## 1. Software Architecture & Python Syllabus Design
+
+### Q1. Why did you use basic Functions, Dictionaries, and Lists instead of Object-Oriented Programming (Classes/OOP)?
+
+**Answer:**
+Our course focuses on mastering foundational Python concepts first:
+* **Functions (`def`):** Used for modular, reusable logic in `comfort_model.py`, `weather_service.py`, and `storage.py`.
+* **Dictionaries (`{}`):** Used to store structured data like `hostel_room_state`, comfort bands, and JSON payloads.
+* **Tuples (`()`):** Used to return multiple values cleanly from a function, such as `(ac_state, servo_angle, reason)`.
+* **Lists (`[]`):** Used for CSV row headers and history tables.
+
+Using simple functions and dictionaries makes the data flow completely transparent and easy for every teammate to trace without unnecessary class boilerplate (`__init__`, `self`, inheritance).
+
+**How Data Flows Through Our Python Functions:**
+1. **`weather_service.fetch_live_weather()`** → Returns a dictionary with Katpadi's outdoor temperature (`34.0°C`) and humidity.
+2. **`comfort_model.calculate_ashrae_comfort(outdoor_temp)`** → Calculates the base comfort temperature using the ASHRAE formula.
+3. **`comfort_model.get_hostel_comfort_band(outdoor_temp, current_hour, preferred_temp)`** → Adds `+1.0°C` at night (`22:00–07:00`) and builds the `±1.5°C` comfort band dictionary (`min_temp`, `optimal_temp`, `max_temp`).
+4. **`comfort_model.evaluate_hostel_ac_decision(room_temp, min_temp, max_temp, last_ac_state)`** → Compares the DHT11 room temperature against the comfort band and returns a 3-item tuple: `("ON" or "OFF", servo_angle, explanation)`.
+5. **`storage.save_telemetry(record_dict)`** → Appends the reading and decision as a new row in `data/hostel_telemetry.csv`.
 
 ---
 
-## 1. Software Architecture & Syllabus-Aligned Design
+### Q2. Why did you use both Flask (`app.py`) and Streamlit (`dashboard.py`)?
 
-### Q1. Why did you use Functions, Dictionaries, and Lists instead of complex Object-Oriented Programming (OOP)?
-
-#### Answer:
-In a First-Year Python curriculum, the academic objective is mastering fundamental computational concepts:
-* **Pure Functions** (`def`) for modular, reusable algorithms.
-* **Dictionaries** (`{}`) and **Lists** (`[]`) for structured data storage (matching JSON API payloads).
-* **Tuples** (`()`) for immutable multi-value returns like `(ac_state, servo_angle, reason)`.
-
-Forcing complex class hierarchies with `__init__`, `super()`, and inheritance adds unnecessary boilerplate when Python's built-in dictionaries represent real-world entities much more cleanly and transparently.
-
-```mermaid
-flowchart TD
-    subgraph Data Structures
-        HD["Hostel State dict<br/>room_id, temp, humidity, ac_state, servo_angle"]
-        WD["Weather Data dict<br/>temperature_c, humidity_pct, source"]
-    end
-
-    subgraph Pure Python Functions
-        F1["calculate_ashrae_comfort(outdoor_temp)"]
-        F2["get_hostel_comfort_band(outdoor_temp, hour)"]
-        F3["evaluate_hostel_ac_decision(temp, min_temp, max_temp, last_state)"]
-        F4["calculate_runtime_reduction(hours_off)"]
-    end
-
-    subgraph Outputs
-        SERVO["Servo Actuation Command tuple<br/>OFF or ON, angle, reason"]
-        SAVINGS["Run-Time Reduction dict<br/>reduction_pct, degree_hours_avoided"]
-        CSV["CSV Storage<br/>hostel_telemetry.csv"]
-    end
-
-    WD --> F1
-    F1 --> F2
-    HD --> F3
-    F2 --> F3
-    F3 --> SERVO
-    F3 --> CSV
-    F3 --> F4
-    F4 --> SAVINGS
-```
-
----
-
-### Q2. Why did you use Flask and Streamlit together instead of just one?
-
-#### Answer:
-This is a standard **Separation of Concerns (SoC)** architectural pattern:
-1. **Flask (Headless REST API Backend):**
-   - Microcontrollers like the ESP32 require ultra-fast, lightweight JSON endpoints (`POST /api/hostel/telemetry`).
-   - Flask processes HTTP requests in milliseconds without rendering UI overhead.
-2. **Streamlit (Presentation & Monitoring Dashboard):**
-   - Streamlit provides a clean, responsive Notion-style interface for users to monitor room telemetry.
-   - It visualizes Plotly interactive charts and lets users test temperature decisions using sliders without altering the embedded firmware code.
+**Answer:**
+Each tool does the job it was designed for:
+1. **Flask (`app.py` on Port 5000 — Hardware Server):**
+   - The physical ESP32-S3 board needs a fast, lightweight URL (`POST /api/hostel/telemetry`) where it can send sensor JSON and get back a tiny JSON reply (`{"ac_state": "ON", "servo_angle": 90}`) in a few milliseconds.
+2. **Streamlit (`dashboard.py` on Port 8501 — Human Web Interface):**
+   - Humans need sliders, radio buttons, metric cards, and a live temperature graph in a web browser.
+   - Our `run_system.py` script launches both servers together with a single command (`py run_system.py`).
 
 ---
 
 ## 2. Scope Justification: Why Hostels Over Classrooms?
 
-### Q3. Why did you focus exclusively on hostel ACs instead of campus classrooms? (EXAMINER FAVORITE)
+### Q3. Why did you focus on hostel room ACs instead of campus classrooms? (Examiner Favorite!)
 
-#### Answer:
-This was a deliberate and realistic engineering design decision based on physical and technical feasibility:
-
-1. **Centralized HVAC Complexity (Tonnage & Occupancy):**
-   - Classrooms are cooled by massive centralized chillers. Calculating real cooling load and energy waste requires knowing compressor tonnage (TR), sensible heat ratio, airflow CFM, solar radiation through windows, and exact real-time student headcounts.
-   - Without high-end industrial flow meters and optical sensors, classroom modeling is purely theoretical and speculative.
-2. **Decentralized Binary Control:**
-   - Hostel rooms have individual split/window AC units with simple on/off rocker switches.
-   - Because they lack thermostats, hostel ACs run continuously at fixed cooling all night, making room temperatures plunge to 19°C.
-3. **Actionable Closed-Loop Retrofit:**
-   - In hostels, an affordable ESP32 + SG90 servo motor (**₹813 BOM**) directly closes the loop by physically toggling the switch without tampering with 230V mains wiring.
-   - It turns the mathematical comfort model into a **tangible physical outcome** rather than an advisory data point on a screen.
+**Answer:**
+This was a deliberate engineering decision based on what can actually be measured and controlled accurately:
+1. **Classrooms Have Unmeasured Variables:**
+   - Campus classrooms use large centralized chillers. Calculating energy waste there requires knowing compressor tonnage (TR), airflow (CFM), solar heat gain, and live student headcounts — industrial sensors that students do not have access to. Guessing those numbers would be fake engineering.
+2. **Hostel Rooms Have a Physical Binary Switch:**
+   - Hostel ACs are controlled by a simple ON/OFF rocker switch on the wall with no thermostat. Left ON at night, they overcool the room down to `19°C`.
+3. **Safe, Closed-Loop Hardware Solution:**
+   - By placing a `DHT11` temperature sensor (`GPIO 4`) and an `SG90` servo motor (`GPIO 18`) at the hostel wall switch, our ₹813 prototype physically turns the switch **OFF (`0°`)** when the room is cool and **ON (`90°`)** when it warms up — without touching dangerous 230V mains wires.
 
 ---
 
 ## 3. Thermal Physics & ASHRAE Standard 55
 
-### Q4. What is ASHRAE, and why are we using the Standard 55 Adaptive Comfort Model instead of a fixed 24°C?
+### Q4. What is ASHRAE Standard 55, and why use it instead of a fixed 22°C?
 
-#### Answer:
-1. **What Does ASHRAE Stand For?**
-   - **ASHRAE** stands for the **American Society of Heating, Refrigerating and Air-Conditioning Engineers**.
-   - Founded in 1894, it is the premier international scientific organization that establishes the global engineering standards for building HVAC, ventilation, and indoor air quality.
-
-2. **What is ASHRAE Standard 55?**
-   - Standard 55 is their globally adopted benchmark titled *"Thermal Environmental Conditions for Human Occupancy"*.
-   - Rather than treating human beings like machines that need an unchanging 22°C or 24°C year-round, Standard 55 defines the **Adaptive Comfort Model**.
-
-3. **Why Not Just Use a Static 22°C or 24°C?**
-   - **Acclimatization:** In hot, tropical climates (where outdoor summer temperatures reach 34°C–38°C), the human body naturally acclimates to warmth through physiological changes (vasodilation, sweating thresholds, and lighter clothing).
-   - **Thermal Shock:** Walking from a 35°C outdoor environment into a static 20°C–22°C room causes thermal discomfort, respiratory irritation, and hypothermic shivering. In that climate, a room at 26°C–27°C feels perfectly refreshing and comfortable!
-   - **Eliminates Subjective Guesswork:** Instead of roommates arguing over arbitrary numbers, referencing an international standard gives the system objective, scientifically validated authority.
-
-4. **The Linear Regression Formula:**
-   Based on empirical field studies across thousands of occupants worldwide, the adaptive comfort equation is:
-
-   $$T_{\text{comf}} = 17.8 + 0.31 \times T_{\text{outdoor}}$$
-
-   * $T_{\text{comf}}$: Optimal indoor operative comfort temperature (°C).
-   * $T_{\text{outdoor}}$: Prevailing mean outdoor air temperature (°C), fetched live for the campus location via Open-Meteo.
-   * **80% Acceptability Limits:** $T_{\text{comf}} \pm 1.75^\circ\text{C}$ (Standard campus design tolerance).
-
-| Outdoor Temp (°C) | Optimal Comfort $T_{\text{comf}}$ (°C) | 80% Acceptable Band (°C) |
-| :---: | :---: | :---: |
-| 15.0°C | 22.4°C | 20.7°C – 24.2°C |
-| 20.0°C | 24.0°C | 22.2°C – 25.8°C |
-| 25.0°C | 25.5°C | 23.8°C – 27.3°C |
-| 30.0°C | 27.1°C | 25.3°C – 28.8°C |
-| 35.0°C | 28.6°C | 26.9°C – 30.4°C |
-| 40.0°C | 30.2°C | 28.4°C – 32.0°C |
+**Answer:**
+1. **What ASHRAE Stands For:**
+   - **A**merican **S**ociety of **H**eating, **R**efrigerating and **A**ir-Conditioning **E**ngineers — the global organization that sets indoor comfort standards for buildings.
+2. **Why Not a Fixed 22°C?**
+   - In hot climates like Katpadi, Vellore (where outdoor temperatures reach `34°C–38°C`), our bodies naturally adapt to warmer weather and we wear lighter clothes. Walking from `34°C` outside into a `20°C` room causes thermal shock and shivering, whereas `25°C–27°C` feels comfortable and saves energy.
+3. **The ASHRAE 55 Adaptive Comfort Equation:**
+   ```text
+   Comfortable Indoor Temp = 17.8 + (0.31 * Outdoor Temp)
+   ```
+   **Example Values:**
+   | Outdoor Temp (°C) | ASHRAE Optimal Target (°C) | ±1.5°C Comfort Band (°C) |
+   | :---: | :---: | :---: |
+   | `20.0°C` | `24.0°C` | `22.5°C – 25.5°C` |
+   | `25.0°C` | `25.6°C` | `24.1°C – 27.1°C` |
+   | `30.0°C` | `27.1°C` | `25.6°C – 28.6°C` |
+   | `34.0°C` (Katpadi) | `28.3°C` | `26.8°C – 29.8°C` |
 
 ---
 
-### Q5. Why is the recommended temperature higher in a hostel room at night?
+### Q5. Why does your code add `+1.0°C` to the target temperature at night (10:00 PM to 7:00 AM)?
 
-#### Answer:
-During the night (22:00 to 07:00), human thermoregulation changes significantly:
-1. **Lower Metabolic Heat Production ($M$):** Drops from $\approx 1.0\text{ met}$ (awake) to $\approx 0.7\text{ met}$ (basal metabolic rate during sleep). The body generates 30% less internal heat.
-2. **Higher Clothing/Bedding Insulation ($I_{cl}$):** Increases from $0.5\text{ clo}$ (shorts/t-shirt) to $1.2 - 1.5\text{ clo}$ (sleepwear plus blankets/quilts).
-3. **The Problem:** When hostel ACs run unmonitored at fixed cooling, the room drops to 19°C – 21°C. Residents wake up shivering and have to pull extra blankets over themselves.
-4. **Our Solution:** The function `get_hostel_comfort_band()` adds a **+1.0°C diurnal offset** during night hours, shifting the comfort threshold to $\approx 26.0^\circ\text{C} - 27.0^\circ\text{C}$. Once the room cools below this limit, the AC is automatically switched off.
+**Answer:**
+When a person goes to sleep at night, two biological changes happen:
+1. **Metabolic Rate Drops by 30%:** A sleeping human produces less internal body heat (`0.7 met` while sleeping vs. `1.0 met` while sitting awake).
+2. **Blanket Insulation Increases:** Sleeping under a blanket or quilt increases thermal insulation from `0.5 clo` (daytime clothes) to `1.2–1.5 clo`.
+
+Because of blankets and lower metabolism, `get_hostel_comfort_band()` automatically adds **`+1.0°C`** between `22:00` and `07:00` so the AC shuts off earlier and prevents the room from freezing at 3:00 AM.
 
 ---
 
-### Q6. How do you evaluate performance when the hostel AC is centralized and you don't know the chiller electrical specs?
+### Q6. How do you measure savings when you don't know the hostel chiller's electrical wattage?
 
-#### Answer:
-Because our hostel cooling is supplied by a centralized campus system, residents do not have access to backend chiller tonnage (TR), power ratings (kW), or compressor COP. Guessing electrical wattage without instruments would be speculative and bad engineering!
-
-Instead, our system evaluates performance based on **direct physical measurements (temperature and time)**:
+**Answer:**
+Instead of guessing fake kilowatt (kW) numbers without a power meter, `calculate_runtime_reduction()` measures two direct physical quantities:
 1. **Active Cooling Run-Time Reduction (%):**
-   $$\text{Run-Time Reduction \%} = \left(\frac{\text{Hours Switched OFF}}{\text{Total Sleep Hours (8.0)}}\right) \times 100\%$$
-   Turning the local room switch off for 4 hours cuts active cooling delivery by **50%**.
-2. **Overcooling Degree-Hours Avoided ($^\circ\text{C}\cdot\text{hr}$):**
-   Quantifies the cumulative thermal chilling avoided. If unregulated cooling would drop the room to 19°C (5°C below the 24°C comfort limit) for 4 hours:
-   $$\text{Degree-Hours Prevented} = 4\text{ hours} \times 4.0^\circ\text{C} = 16.0^\circ\text{C}\cdot\text{hr}$$
-3. **Thermal Comfort Adherence Rate:**
-   Measures the percentage of sleep hours maintained strictly inside the ASHRAE Standard 55 comfort band (typically improving from ~40% unmonitored to **>90%** automated).
+   ```text
+   Run-Time Reduction (%) = (Hours AC Switched OFF / 8.0 Sleep Hours) * 100
+   ```
+   If our controller turns the AC off for `4 hours` out of an `8-hour` night, it reduces active cooling run-time by **50%**.
+2. **Overcooling Degree-Hours Avoided (°C·hr):**
+   Measures how much excess chilling was prevented (`Hours OFF * 4.0°C = 16.0 °C·hr` for a 4-hour shutoff).
 
 ---
 
-### Q7. How does the system handle individual resident preferences?
+### Q7. What if a student wants a colder or warmer room than the formula suggests?
 
-#### Answer:
-In real life, thermal comfort is subjective — some residents feel warm easily while others feel chilly.
-Our system allows the resident to dial in their **Preferred Room Target Temperature** on the dashboard sidebar (e.g., 24.5°C):
-* **Default Setting:** Automatically defaults to the scientific ASHRAE adaptive weather target (~25.0°C).
-* **Tolerance Deadband:** The system centers a $\pm 1.5^\circ\text{C}$ deadband around the resident's preference (e.g. $[23.0^\circ\text{C} - 26.0^\circ\text{C}]$).
-* **Overnight Preservation:** Even with a custom preference, the system still automatically applies the biological $+1.0^\circ\text{C}$ sleep offset during night hours (22:00 to 07:00) to account for sleepwear and blankets.
+**Answer:**
+Thermal comfort varies from person to person, so the dashboard includes a **Preferred Target Temperature Slider (`16.0°C to 32.0°C`)** plus an **Operating Mode selector**:
+* **Preferred Slider (`16.0°C – 32.0°C`):** Centers the `±1.5°C` comfort band around whatever temperature the student chooses (for example, `24.0°C` gives a band of `22.5°C – 25.5°C`).
+* **Dashboard Manual Override:** Lets the student force the switch **ON (`90°`)** or **OFF (`0°`)** from their laptop browser.
+* **Physical Touch Button (`GPIO 10`):** Lets the student tap the capacitive touch sensor on the wall unit to toggle the AC switch immediately without opening a laptop.
 
 ---
 
 ## 4. Control Systems & Hysteresis Logic
 
-### Q8. What is Hysteresis (Deadband), and why is it needed for an AC switch?
+### Q8. What is Hysteresis (Deadband), and why is it necessary for a motorized switch?
 
-#### Answer:
-Without hysteresis, if the target temperature is $26.0^\circ\text{C}$, the system would rapidly cycle:
-* Temp reaches $26.1^\circ\text{C}$ $\rightarrow$ AC switches ON.
-* Temp cools to $25.9^\circ\text{C}$ in 30 seconds $\rightarrow$ AC switches OFF.
-* Temp rises to $26.1^\circ\text{C}$ in 1 minute $\rightarrow$ AC switches ON again.
+**Answer:**
+If our target temperature is `25.0°C` and we had no deadband buffer, the servo motor would wear out:
+* At `25.1°C` → AC turns ON.
+* 20 seconds later at `24.9°C` → AC turns OFF.
+* 20 seconds later at `25.1°C` → AC turns ON again.
 
-This phenomenon is called **compressor hunting / chatter**, which burns out relay switches and damages compressor motors.
+This rapid clicking is called **switch chatter / hunting**.
 
-#### Hysteresis State Transition:
-```mermaid
-stateDiagram-v2
-    [*] --> AC_OFF
-    AC_OFF --> AC_ON : Temp >= Upper Threshold (max_temp)
-    AC_ON --> AC_OFF : Temp <= Lower Threshold (min_temp)
-    
-    state "AC is ON (Cooling)" as AC_ON {
-        [*] --> Maintaining_Cooling
-        Maintaining_Cooling --> Maintaining_Cooling : min_temp < Temp < max_temp
-    }
-
-    state "AC is OFF (Resting)" as AC_OFF {
-        [*] --> Maintaining_Rest
-        Maintaining_Rest --> Maintaining_Rest : min_temp < Temp < max_temp
-    }
-```
-* **Upper Cutoff ($T_{\text{max}}$):** When room warms up to $T_{\text{max}}$, AC turns ON (Servo to 90°).
-* **Lower Cutoff ($T_{\text{min}}$):** Once room cools down to $T_{\text{min}}$, AC turns OFF (Servo to 0°).
-* **Deadband $[T_{\text{min}}, T_{\text{max}}]$:** If the room is anywhere between these two values, the system **maintains its previous state**, ensuring mechanical stability.
+**How Our `±1.5°C` Hysteresis Deadband Solves It (for a `25.0°C` target):**
+* **Lower Limit (`23.5°C`):** Room has cooled down enough → Turn AC **OFF (`0°`)**.
+* **Upper Limit (`26.5°C`):** Room has warmed up enough → Turn AC **ON (`90°`)**.
+* **Inside the Band (`23.5°C to 26.5°C`):** **Keep the previous state!** If the AC was ON, it stays ON until the room reaches `23.5°C`. If it was OFF, it stays OFF until the room warms back up to `26.5°C`.
 
 ---
 
-## 5. Hardware, ESP32 & IoT Engineering
+## 5. Hardware, ESP32-S3 & IoT Engineering
 
-### Q9. Why use an SG90 Servo motor to flip the switch instead of an internal relay?
+### Q9. Why use an SG90 Servo motor to flip the wall switch instead of an electrical relay?
 
-#### Answer:
-1. **Zero High-Voltage AC Tampering (Safety):** Hostels and rented rooms strictly prohibit splicing or rewiring 230V mains switchboards. Relays carry electrical shock and fire hazards for student prototypes.
-2. **Non-Invasive Universal Retrofit:** An SG90 servo mounts externally on the existing switch plate using adhesive tape or a 3D-printed bracket. It mechanically pushes the physical rocker switch just like a human finger.
-3. **Reversibility:** When moving out or in emergencies, the servo unit can be unclipped without leaving any damage or wiring trace.
-
-```mermaid
-flowchart LR
-    ESP32["ESP32 DevKit<br/>(GPIO 18 PWM)"] -->|Pulse Width Modulation| SERVO["SG90 Micro Servo"]
-    SERVO -->|0 deg Position| OFF["Rocker Switch: OFF<br/>(AC Disengaged)"]
-    SERVO -->|90 deg Position| ON["Rocker Switch: ON<br/>(AC Engaged)"]
-```
+**Answer:**
+1. **Complete Electrical Safety:** Hostel students are not allowed to open 230V AC wall switchboards or cut mains wires. A servo motor works from the outside by mechanically pushing the plastic switch like a finger.
+2. **Easy to Remove:** It mounts next to the switch plate and can be removed in seconds without leaving any wiring changes.
+3. **External 5V Power Supply:** We power the SG90 servo from an external 5V adapter (with its ground wire connected to the ESP32's `GND` pin for a common ground reference) so the motor has strong, reliable torque without causing the ESP32-S3 to brown out.
 
 ---
 
-### Q10. What happens if WiFi drops or the backend laptop crashes while residents are asleep?
+### Q10. What happens if the mobile hotspot disconnects or the laptop shuts down while students are sleeping?
 
-#### Answer:
-The ESP32 firmware contains an **Autonomous Local Failsafe**:
-```cpp
-void executeOfflineFailsafe(float temp) {
-  if (temp <= 24.0 && currentAcState == "ON") {
-    setAcSwitch(ANGLE_OFF, "OFF"); // Shuts off if room becomes too cold
-  } else if (temp >= 26.5 && currentAcState == "OFF") {
-    setAcSwitch(ANGLE_ON, "ON");  // Restores cooling if room gets warm
-  }
-}
-```
-* If HTTP requests return an error or WiFi is disconnected, the ESP32 logs `[OFFLINE AUTO]` to the on-device display and enforces hardcoded safety thresholds ($24.0^\circ\text{C} - 26.5^\circ\text{C}$). The resident is never left shivering in an overcooled room.
+**Answer:**
+The ESP32-S3 firmware (`hostel_ac_controller.ino`) has a built-in **Local Autonomous Hysteresis Failsafe**:
+* Every time the ESP32 talks to the Flask server, it saves the latest `comfortMin` and `comfortMax` limits in its own memory (defaulting to `23.5°C – 26.5°C`).
+* If WiFi disconnects or the laptop is turned off, the ESP32 automatically switches to its internal `evaluateLocalHysteresis()` function.
+* It keeps reading the `DHT11` sensor on `GPIO 4` every 2.5 seconds and turns the servo **OFF (`0°`)** if the room drops to `comfortMin` and **ON (`90°`)** if it rises to `comfortMax`. The student is never left freezing!
 
 ---
 
-## 6. Python Syllabus & Concepts Mapping
+## 6. First-Year Python Syllabus Mapping
 
-### Q11. How does this codebase reflect first-year Python syllabus topics?
+### Q11. Where is each Python syllabus concept used in your code?
 
-#### Answer:
-| Syllabus Topic | Concrete Code Location | Explanation |
+**Answer:**
+
+| Python Syllabus Topic | File & Function | How We Used It |
 | :--- | :--- | :--- |
-| **Functions & Modules** | [`comfort_model.py`](../comfort_model.py) | Pure functions with clear docstrings (`calculate_ashrae_comfort`) |
-| **Conditionals (if/elif/else)** | [`comfort_model.py`](../comfort_model.py) | 3-way hysteresis branch (`<= min`, `>= max`, deadband) |
-| **Lists, Dicts, Tuples** | [`app.py`](../app.py) | Structured state dicts; functions returning `(state, angle, reason)` tuples |
-| **File Handling (CSV)** | [`storage.py`](../storage.py) | Context manager `with open(...)` appending CSV telemetry rows |
-| **Exception Handling (try/except)** | [`weather_service.py`](../weather_service.py) | `try-except` handling network drops with offline fallback |
-| **External APIs & Requests** | [`weather_service.py`](../weather_service.py) | `requests.get()` querying Open-Meteo live endpoint |
-| **Data Visualization** | [`dashboard.py`](../dashboard.py) | Interactive Plotly dual-band time-series graphs |
+| **Variables & Constants** | `config.py` | Stores coordinates, ASHRAE constants (`17.8`, `0.31`), and pin angles in one file. |
+| **Functions (`def`)** | `comfort_model.py` | 4 modular functions (`calculate_ashrae_comfort`, `get_hostel_comfort_band`, `evaluate_hostel_ac_decision`, `calculate_runtime_reduction`). |
+| **Conditionals (`if/elif/else`)** | `comfort_model.py` | 3-branch hysteresis check (`<= min_temp`, `>= max_temp`, `else` keep state) and night mode check. |
+| **Dictionaries (`{}`) & Tuples (`()`)** | `app.py`, `comfort_model.py` | `hostel_room_state` dictionary and `(ac_state, servo_angle, reason)` return tuple. |
+| **File Handling (`with open`, CSV)** | `storage.py` | Appends sensor logs to `data/hostel_telemetry.csv` using `mode="a"` and `csv.writer`. |
+| **Exception Handling (`try/except`)** | `weather_service.py`, `app.py`, `storage.py` | Prevents crashes when WiFi drops, weather APIs time out, or files are busy. |
+| **External Libraries (`requests`, `pandas`, `flask`, `streamlit`)** | `weather_service.py`, `app.py`, `dashboard.py` | Fetches live weather, runs the HTTP server, processes CSV tables, and plots interactive graphs. |
 
 ---
 
-## 7. Edge Cases, Limitations & Future Scope
+## 7. Limitations & Future Scope
 
-### Q12. What are the limitations of this prototype?
+### Q12. What are the limitations of this prototype, and how could you improve it in the future?
 
-#### Answer:
-1. **DHT11 Sensor Accuracy:** The DHT11 has an accuracy of $\pm 2.0^\circ\text{C}$ and $1\text{ Hz}$ sampling rate. Upgrading to a **DHT22** or **BME280** ($\pm 0.5^\circ\text{C}$ accuracy) would provide tighter precision.
-2. **Binary Control Only:** The servo can only toggle full power ON or OFF. It cannot adjust fan speeds or compressor inverter percentages.
-
----
-
-### Q13. If you had 6 more months to scale this, what would you add?
-
-#### Answer:
-1. **Infrared (IR) Blaster Integration:** Replace the physical servo motor with an IR LED transmitter on the ESP32 that sends native remote-control signals (adjusting setpoint, mode, and fan speed directly).
-2. **MQTT Protocol / Micro-mesh:** Transition from HTTP polling to an MQTT broker (like Mosquitto) to enable instant publish-subscribe telemetry for hundreds of hostel rooms with minimal bandwidth.
+**Answer:**
+1. **Sensor Precision:** The `DHT11` sensor has a `±2.0°C` accuracy tolerance. Upgrading to a `BME280` or `DHT22` sensor (`±0.5°C` accuracy) would make temperature switching even more precise.
+2. **Future Upgrade — Infrared (IR) LED Transmitter:** For hostel rooms that have split ACs with remote controls, we could add a ₹15 IR LED to the ESP32 to send infrared remote signals directly instead of moving a mechanical servo arm.

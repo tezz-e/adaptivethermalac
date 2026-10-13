@@ -503,17 +503,15 @@ with tab_science:
     w3.metric("Weather Source",     outdoor_weather["source"])
 
     st.divider()
-    # r"..." is a raw string — the backslashes are not treated as escape sequences,
-    # which is important for LaTeX math notation (e.g., \times, \text{})
     st.markdown(
-        r"""
+        """
         **ASHRAE 55 Adaptive Comfort Equation:**
-        $$T_{\text{comf}} = 17.8 + 0.31 \times T_{\text{outdoor}}$$
+        `Comfortable Indoor Temp = 17.8 + (0.31 × Outdoor Temp)`
 
-        **Why Overnight Sleep Mode Adds $+1.0\,^\circ\text{C}$ (22:00 – 07:00):**
-        1. **Metabolic Rate Drops:** Human heat production drops from $1.0\text{ met}$ (awake) to $0.7\text{ met}$ (sleeping).
-        2. **Blanket Insulation:** Bedding increases clothing insulation from $0.5\text{ clo}$ to $\sim 1.3\text{ clo}$.
-        3. **Hysteresis Deadband ($\pm 1.5\,^\circ\text{C}$):** Prevents the SG90 servo and AC relay from chattering on every $0.1\,^\circ\text{C}$ fluctuation.
+        **Why Overnight Sleep Mode Adds `+1.0 °C` (22:00 – 07:00):**
+        1. **Metabolic Rate Drops:** Human heat production drops from `1.0 met` (awake) to `0.7 met` (sleeping).
+        2. **Blanket Insulation:** Bedding increases thermal insulation from `0.5 clo` to `1.2 – 1.5 clo`.
+        3. **Hysteresis Deadband (`±1.5 °C`):** Prevents the SG90 servo and AC switch from chattering on small `0.1 °C` fluctuations.
         """
     )
 
