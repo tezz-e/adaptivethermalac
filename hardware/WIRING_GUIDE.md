@@ -1,47 +1,33 @@
-# ESP32 Hardware Wiring Guide
+# ESP32-S3 Hardware Wiring Guide
 
-This guide details the complete hardware connections for the **Hostel AC Physical Control Unit** prototype (Total BOM: ₹813).
-
----
-
-## 1. Component Pinout Connections
-
-| Component | Pin Label | ESP32 Pin | Wire Color Recommendation | Notes |
-| :--- | :--- | :--- | :--- | :--- |
-| **DHT11 Sensor** | VCC (+) | 3V3 / VIN | Red | Connect to 3.3V (or 5V if module has onboard regulator) |
-| | GND (-) | GND | Black | Common Ground |
-| | DATA (out) | GPIO 4 | Yellow / Blue | If 3-pin module, resistor is builtin. If 4-pin bare, add 10kΩ pullup to 3.3V |
-| **SG90 Servo Motor** | VCC (Red) | VIN (5V) | Red | Servo needs 5V for mechanical torque |
-| | GND (Brown) | GND | Black | Common Ground |
-| | PWM (Orange/Yellow) | GPIO 18 | Orange | Connected to ESP32 PWM pin |
-| **0.96" OLED Display (I2C)** | VCC | 3V3 | Red | Operates on 3.3V |
-| | GND | GND | Black | Common Ground |
-| | SDA | GPIO 21 | Green | ESP32 Hardware I2C SDA |
-| | SCL | GPIO 22 | White / Blue | ESP32 Hardware I2C SCL |
-| **(Alternative) 16x2 I2C LCD** | VCC | VIN (5V) | Red | 16x2 LCD backlight requires 5V |
-| | GND | GND | Black | Common Ground |
-| | SDA | GPIO 21 | Green | Shared I2C Bus |
-| | SCL | GPIO 22 | White / Blue | Shared I2C Bus |
+This guide details the exact pin connections for the **Hostel AC Physical Control Unit** running on the **ESP32-S3 DevKitC-1 N16R8** (Total BOM: ₹813).
 
 ---
 
-## 2. Servo Mechanical Mounting on Mock AC Switch
+## 1. Complete Pinout Table
 
-1. Take the single-arm horn that comes with the SG90 servo.
-2. In the `test_servo_dht.ino` or with power disconnected, position the arm such that:
-   - At **0°**, the arm rests away or in the switch OFF position.
-   - At **90°**, the arm pivots against the toggle switch rocker, physically pressing it to the ON position.
-3. Secure the servo bracket using double-sided mounting foam or a small 3D-printed/cardboard rig next to the switch.
+| Component | Module Pin | ESP32-S3 Pin | Notes |
+| :--- | :--- | :--- | :--- |
+| **DHT11 Sensor** | `VCC (+)` | `3V3` | 3.3V power |
+| | `DATA (out)` | **`GPIO 4`** | Digital temperature & humidity signal |
+| | `GND (-)` | `GND` | Ground |
+| **TTP223 Capacitive Touch Button** | `VCC` | `3V3` | 3.3V power |
+| | `I/O (SIG)` | **`GPIO 10`** | Active-HIGH touch signal (instantly toggles servo `0°` / `90°`) |
+| | `GND` | `GND` | Ground |
+| **1.3" SH1106 I2C OLED Display** | `VCC` | `3V3` | 3.3V power |
+| | `GND` | `GND` | Ground |
+| | `SDA` | **`GPIO 8`** | Hardware I2C Data |
+| | `SCL` | **`GPIO 9`** | Hardware I2C Clock |
+| **SG90 Micro Servo Motor** | `Orange / Yellow (PWM)` | **`GPIO 18`** | 50Hz PWM control signal (`0°` = OFF, `90°` = ON) |
+| | `Red (VCC +5V)` | **External 5V `+`** | External 5V adapter provides clean torque current |
+| | `Brown / Black (GND)` | **External `GND` + ESP32 `GND`** | **IMPORTANT:** Tie external adapter `GND` and ESP32 `GND` together! |
 
 ---
 
-## 3. Quick Troubleshooting Checklist
+## 2. On-Screen OLED Status Badges
 
-- **Sensor reads NaN (Not a Number)**:
-  - Check that DHT11 data pin is seated firmly into GPIO 4.
-  - Verify VCC is on 3.3V and GND is connected.
-- **Servo jitters or ESP32 resets on servo movement**:
-  - The servo draws sudden peak current (~200mA). Ensure ESP32 is powered from a decent 5V 1A+ USB port or phone charger (not an unpowered USB hub).
-- **OLED screen is blank**:
-  - Verify I2C address is `0x3C` (default for most 0.96" SSD1306 displays).
-  - Ensure SDA is GPIO 21 and SCL is GPIO 22.
+The 1.3" SH1106 OLED screen shows live hardware diagnostics so you always know what the board is doing:
+* **`DHT:LIVE`** — Reading real temperature & humidity from the physical DHT11 on `GPIO 4`. (`DHT:SIM` if sensor wire is loose).
+* **`SRV:RDY` / `SRV:ON`** — Servo initialized on `GPIO 18` (`0°` when AC is OFF, `90°` when AC is ON).
+* **`TCH`** — Appears on the middle row when you toggle the AC manually using the capacitive touch button on `GPIO 10`.
+* **Bottom Row:** Displays WiFi connection status or `[OFFLINE AUTO]` if running on autonomous failsafe.

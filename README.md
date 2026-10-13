@@ -1,169 +1,105 @@
 # Adaptive Thermal Comfort AC Controller for Hostels
-### IoT Switch Actuation & ASHRAE 55 Adaptive Comfort System
+### Closed-Loop IoT Switch Actuation & ASHRAE Standard 55 Control System
 
-> **A closed-loop physical IoT system:**
-> An ESP32 microcontroller with a DHT11 sensor monitors hostel room temperatures and mechanically actuates an **SG90 micro servo motor** to flip the physical AC rocker switch ON or OFF based on the **ASHRAE 55 Adaptive Comfort Model**, compensating for nighttime sleep metabolism and blanket insulation.
-
----
-
-## Getting Started: Start Here!
-
-If you are opening this repository for the first time, do not worry if you have never built an IoT device or worked with backend servers before. Everything in this project has been built using **simple, beginner-friendly Python** (only basic functions, dictionaries, and lists — zero complex classes or OOP).
-
-Follow this 3-step guide to get up to speed in 15 minutes:
-
-### Step 1: Read the Plain-English Walkthrough (10 Minutes)
-Open [**docs/TEAM_WALKTHROUGH.md**](docs/TEAM_WALKTHROUGH.md).  
-Written like an experienced engineer explaining things to a beginner, it walks you through:
-* The real physical problem: hostel rooms freezing down to 19°C overnight because wall switches lack thermostats.
-* Why we do not tackle classrooms (knowing what not to measure when you lack sensors).
-* What every single file in the project does and why libraries like `requests` and `flask` are imported.
-* What ASHRAE means and why we use it.
-* Exact review speaking scripts for each part of the project.
-
-### Step 2: Practice with Your 1-on-1 AI Tutor (5 Minutes)
-Open [**docs/AI_ONBOARDING_PROMPT.md**](docs/AI_ONBOARDING_PROMPT.md).  
-Copy that entire text and paste it into ChatGPT, Claude, or Gemini. The prompt instructs the AI to:
-* Act like a patient mentor who assumes you know nothing about programming.
-* Explain any specific file to you line by line.
-* Conduct a friendly mock viva review with 3 to 5 realistic questions.
-
-### Step 3: Review Expected Viva Questions
-Open [**docs/PROJECT_VIVA_QA.md**](docs/PROJECT_VIVA_QA.md).  
-Contains answers and diagrams for 13 common questions professors ask (hysteresis, sleep metabolism, SG90 servo safety, offline failsafe, and syllabus mapping).
+> **What this project does in one sentence:**  
+> An **ESP32-S3 microcontroller** reads room temperature & humidity from a **DHT11 sensor (`GPIO 4`)**, talks to a Python backend running the **ASHRAE Standard 55 Adaptive Comfort Model** (with overnight sleep compensation), and physically flips the hostel AC wall switch **ON (`90°`)** or **OFF (`0°`)** using an **SG90 micro servo motor (`GPIO 18`)**.
 
 ---
 
-## Subsystems & Architecture Overview
+## Teammates: Start Here! (15-Minute Prep Guide)
 
-The system is organized into modular subsystems with clean separation of responsibilities:
+If you are opening this repository before tomorrow's review, **don't panic!** The entire Python codebase has been stripped down to **simple, beginner-friendly functions and dictionaries** (zero classes, zero OOP, zero complicated HTML/CSS).
 
-| Subsystem / Area | Primary Files | Key Concepts & Architecture |
-| :--- | :--- | :--- |
-| **Comfort Model & Decision Logic** | [`comfort_model.py`](comfort_model.py) | **ASHRAE Standard 55 & Decision Logic:** Linear formula `17.8 + 0.31 * outdoor`, +1.0°C night sleep offset for blankets, and thermostat hysteresis deadband to prevent switch chatter. |
-| **Weather Pipeline** | [`weather_service.py`](weather_service.py) | **Live Meteorological Pipeline:** Open-Meteo REST API data fetching for campus coordinates, 5-minute memory cache to prevent API spamming, and `try...except` offline fallback. |
-| **Run-Time Analytics** | [`comfort_model.py`](comfort_model.py), [`dashboard.py`](dashboard.py) | **Cooling Run-Time Reduction:** Directly measured temperature dynamics cutting active cooling time by ~50% overnight, preventing 16 degree-hours of overcooling without guessing chiller tonnage. |
-| **Dashboard & Web API** | [`dashboard.py`](dashboard.py), [`app.py`](app.py) | **Presentation & Communication:** Streamlit Notion-style web dashboard, resident preference slider, and Flask REST API endpoints serving JSON decisions to the ESP32. |
-| **Hardware & Firmware** | [`hardware/`](hardware/) | **Embedded IoT Actuation:** ESP32 DevKit C++ firmware, DHT11 sensing on GPIO 4, and SG90 servo motor flipping the physical rocker switch safely without mains rewiring. |
-| **Data Storage & Failsafe** | [`storage.py`](storage.py) | **Data Persistence & Offline Failsafe:** CSV telemetry logging using `with open` context managers and ESP32 offline autonomous failsafe. |
----
+Follow these 3 steps to get ready in 15 minutes:
 
-## 1. Project Overview & Problem Statement
-
-* **The Problem:** Campus hostel AC units have only a binary on/off rocker switch on the wall — **no thermostat and no remote control**. Left running overnight, rooms plunge below 19°C, causing broken sleep, shivering under blankets, and massive wasted electricity.
-* **Why Hostels (Not Classrooms):** Academic buildings use centralized chillers where calculating energy requires knowing chiller tonnage (TR), power ratings, airflow CFM, and student headcounts — none of which are instrumented. In contrast, hostel rooms have individual wall switches right in front of us, where our ESP32 device directly solves a real physical problem.
-* **Our Solution:** An affordable IoT retrofit (**₹813 BOM**) with an ESP32 microcontroller, a DHT11 temperature sensor, and an SG90 micro servo motor. The system calculates real-time comfort using ASHRAE Standard 55 with nighttime sleep compensation, and mechanically toggles the wall switch ON or OFF while reporting live telemetry to a Notion-style web dashboard.
+1. **Read the Plain-English Walkthrough (8 mins):**  
+   Open [**docs/TEAM_WALKTHROUGH.md**](docs/TEAM_WALKTHROUGH.md). It explains the real-world problem, why we focus on hostel switches instead of classrooms, what every single Python file and hardware pin does in plain English, and gives you exact **word-for-word speaking scripts** for the viva.
+2. **Practice with Your 1-on-1 AI Mentor (5 mins):**  
+   Open [**docs/AI_ONBOARDING_PROMPT.md**](docs/AI_ONBOARDING_PROMPT.md). Copy and paste that prompt into ChatGPT, Claude, or Gemini — it will act as a friendly tutor, explain your part of the code line-by-line, and quiz you with 3 easy mock viva questions.
+3. **Skim the Examiner Q&A Sheet (2 mins):**  
+   Open [**docs/PROJECT_VIVA_QA.md**](docs/PROJECT_VIVA_QA.md) for quick answers to the 13 most common professor questions.
 
 ---
 
-## 2. System Architecture
+## 1. Repository File Map (What Every File Does)
+
+The entire Python backend and dashboard is just **6 short files**:
+
+| File | Lines | What It Does (Plain English) |
+| :--- | :---: | :--- |
+| [`config.py`](config.py) | ~38 | Stores constants in one place: Katpadi campus coordinates (`12.9692°N, 79.1559°E`), ASHRAE formula numbers (`17.8`, `0.31`), night sleep offset (`+1.0°C`), servo angles (`0°` OFF, `90°` ON), and the CSV file path. |
+| [`weather_service.py`](weather_service.py) | ~68 | Fetches live outdoor temperature & humidity for **Katpadi, Vellore** using `requests.get()` (with a 5-minute memory cache and `try...except` offline backup so it never crashes). |
+| [`comfort_model.py`](comfort_model.py) | ~98 | **The Mathematical Brain:** Calculates the ASHRAE 55 comfort temperature ($T_{\text{comf}} = 17.8 + 0.31 \times T_{\text{outdoor}}$), adds $+1.0^\circ\text{C}$ at night (10 PM – 7 AM) for blankets & lower sleep metabolism, and uses **hysteresis ($\pm 1.5^\circ\text{C}$ deadband)** to decide if the AC switch should be `ON (90°)` or `OFF (0°)`. |
+| [`storage.py`](storage.py) | ~74 | Saves every sensor reading and AC decision into `data/hostel_telemetry.csv` using Python's `with open(...)` context manager, and reads it back with `pandas` for the graph. |
+| [`app.py`](app.py) | ~260 | **The Flask Server (Port 5000):** Receives live readings from the ESP32 over WiFi HTTP (`POST /api/hostel/telemetry`) or USB Serial, runs `comfort_model.py`, saves to CSV, and tells the ESP32 whether to move the servo to `0°` or `90°`. Also responds to UDP broadcast on port `5001` so the ESP32 finds the laptop IP automatically. |
+| [`dashboard.py`](dashboard.py) | ~315 | **The Live Web Dashboard (Port 8501):** Built with pure native Streamlit components (`st.metric`, `st.slider`, `st.radio`, `st.tabs`, `st.plotly_chart`). Shows live DHT11 temperature/humidity, AC state, servo angle, target setpoint (`16°C–32°C`), and an auto-scaling temperature vs. comfort band graph. |
+| [`run_system.py`](run_system.py) | ~56 | **One-Click Launcher:** Starts both `app.py` (Flask) and `dashboard.py` (Streamlit) at the same time with one command (`py run_system.py`). |
+| [`hardware/hostel_ac_controller/hostel_ac_controller.ino`](hardware/hostel_ac_controller/hostel_ac_controller.ino) | C++ | **ESP32-S3 Firmware:** Reads the DHT11 (`GPIO 4`) and Capacitive Touch button (`GPIO 10`), updates the 1.3" SH1106 OLED (`SDA=8, SCL=9`), sends readings to the laptop, and drives the SG90 servo (`GPIO 18`). Includes an offline failsafe if WiFi disconnects. |
+
+---
+
+## 2. System Architecture Diagram
 
 ```mermaid
 flowchart TD
-    subgraph Data Acquisition
-        API["Open-Meteo Weather API<br/>(Live Campus Weather)"]
-        DHT["DHT11 Sensor<br/>(Room Temp and Humidity)"]
+    subgraph Hardware ["ESP32-S3 Hardware Unit (Hostel Wall Switch)"]
+        DHT["DHT11 Sensor (GPIO 4)<br/>Room Temp & Humidity"]
+        TOUCH["TTP223 Touch Button (GPIO 10)<br/>Instant Manual Toggle"]
+        ESP["ESP32-S3 DevKitC-1<br/>WiFi HTTP + USB Serial + Offline Failsafe"]
+        OLED["1.3-inch SH1106 OLED (GPIO 8/9)<br/>Shows Temp, Target, DHT:LIVE, SRV:RDY"]
+        SERVO["SG90 Micro Servo (GPIO 18)<br/>0 deg = OFF | 90 deg = ON"]
     end
 
-    subgraph Processing Engine
-        ASHRAE["ASHRAE Standard 55 Model<br/>T_comf = 17.8 + 0.31 * T_outdoor"]
-        SLEEP["Diurnal Sleep Offset<br/>(+1.0C Night clo and met Adjustment)"]
-        HYST["Thermostat Hysteresis Logic<br/>(Prevents Compressor Chatter)"]
+    subgraph Backend ["Python Backend & Comfort Engine (Laptop)"]
+        WEATHER["weather_service.py<br/>Katpadi Live Outdoor Weather"]
+        MODEL["comfort_model.py<br/>ASHRAE 55 + Sleep Offset (+1C) + Hysteresis"]
+        FLASK["app.py (Flask API :5000)<br/>WiFi HTTP + UDP Discovery (:5001) + USB Bridge"]
+        CSV["storage.py<br/>data/hostel_telemetry.csv"]
     end
 
-    subgraph Hardware and Dashboard
-        ESP["ESP32 Microcontroller<br/>(WiFi HTTP Client)"]
-        SERVO["SG90 Servo Motor<br/>(Actuates Physical Switch: 0 deg / 90 deg)"]
-        OLED["OLED or LCD Display<br/>(On-Device Live Telemetry)"]
-        DASH["Streamlit Dashboard<br/>(Notion Minimalist UI)"]
-        CSV["CSV Storage<br/>(data/hostel_telemetry.csv)"]
+    subgraph UI ["Streamlit Engineering Dashboard (:8501)"]
+        DASH["dashboard.py<br/>Target Slider (16-32C), Mode Radio, Live Metrics & Auto-Scaling Plotly Graph"]
     end
 
-    API --> ASHRAE
-    ASHRAE --> SLEEP
-    SLEEP --> HYST
     DHT --> ESP
-    ESP -->|POST /api/hostel/telemetry| HYST
-    HYST -->|JSON Decision| ESP
-    ESP --> SERVO
-    ESP --> OLED
-    HYST --> CSV
+    TOUCH --> ESP
+    ESP <-->|WiFi HTTP or USB Serial| FLASK
+    WEATHER --> MODEL
+    MODEL <--> FLASK
+    FLASK --> CSV
+    FLASK <--> DASH
     CSV --> DASH
+    ESP --> OLED
+    ESP --> SERVO
 ```
 
 ---
 
-## 3. Quick Start (Run on Your Laptop in 60 Seconds)
+## 3. Hardware Pinout (ESP32-S3 DevKitC-1, Total BOM: ₹813)
 
-### Step 1: Install Required Packages
-Open PowerShell or Command Prompt in this folder and run:
+| Component | ESP32-S3 Pin | Power & Wiring Notes | Cost (₹) |
+| :--- | :--- | :--- | :---: |
+| **ESP32-S3 DevKitC-1 N16R8** | USB-C (`COM12`) | Powered via USB cable connected to laptop | 400 |
+| **DHT11 Temperature & Humidity Sensor** | `GPIO 4` (Data) | `VCC` $\rightarrow$ `3V3`, `GND` $\rightarrow$ `GND` | 51 |
+| **TTP223 Capacitive Touch Button** | `GPIO 10` (`I/O`) | `VCC` $\rightarrow$ `3V3`, `GND` $\rightarrow$ `GND` (toggles servo `0°`/`90°` on touch) | *(incl.)* |
+| **1.3" SH1106 I2C OLED Display** | `SDA = GPIO 8`, `SCL = GPIO 9` | `VCC` $\rightarrow$ `3V3`, `GND` $\rightarrow$ `GND` (I2C address `0x3C`) | 212 |
+| **SG90 Micro Servo Motor** | `GPIO 18` (PWM Signal) | Power `VCC` (`+5V`) from external 5V adapter; **connect external adapter `GND` and ESP32 `GND` together** (common ground) | 150 |
+| **Total Prototype Cost** | | | **₹813** |
+
+---
+
+## 4. How to Run the Project (In 30 Seconds)
+
+### Step 1: Install Python Dependencies
 ```bash
 py -m pip install -r requirements.txt
 ```
 
-### Step 2: Launch the Full System (1-Click)
+### Step 2: Start Both the Backend Server & Live Dashboard
 ```bash
 py run_system.py
 ```
-* **Web Dashboard:** [http://localhost:8501](http://localhost:8501)
+* **Live Dashboard:** [http://localhost:8501](http://localhost:8501)
 * **Flask REST API:** [http://127.0.0.1:5000](http://127.0.0.1:5000)
 
-### Testing Without Hardware:
-In the dashboard sidebar:
-1. Adjust the **"Your Preferred Temperature"** slider.
-2. Use the **"Test Sensor Simulator"** slider to test room temperatures from 18°C to 30°C.
-3. Click **"Send Reading to Model"** to watch the AC switch state and servo angle flip live on screen!
-
----
-
-## 4. Hardware Setup (BOM: ₹813)
-
-### Bill of Materials
-| Component | Function | Approx Price (₹) |
-| :--- | :--- | :--- |
-| **ESP32 Dev Board** | WiFi microcontroller & HTTP client | 400 |
-| **SG90 Servo Motor** | Physical switch actuator (0° OFF / 90° ON) | 150 |
-| **0.96" I2C OLED (SSD1306) / 16x2 LCD** | On-device temperature & state display | 212 |
-| **DHT11 Sensor** | Room temperature & humidity sensing | 51 |
-| **Total** | | **₹813** |
-
-### Pinout Connections
-* **DHT11 Data Pin:** Connect to `GPIO 4` (VCC to `3V3`, GND to `GND`)
-* **SG90 Servo Signal:** Connect to `GPIO 18` (VCC to `VIN 5V`, GND to `GND`)
-* **I2C Display (OLED / LCD):**
-  - `SDA` -> `GPIO 21`
-  - `SCL` -> `GPIO 22`
-  - `VCC` -> `3V3` (for OLED) or `5V` (for 16x2 LCD)
-  - `GND` -> `GND`
-
----
-
-## 5. Thermal Comfort Science (ASHRAE Standard 55)
-
-The adaptive comfort model establishes that human thermal comfort naturally shifts with outdoor temperatures:
-
-$$T_{\text{comf}} = 17.8 + 0.31 \times T_{\text{outdoor}}$$
-
-* **80% Acceptability Limits:** $T_{\text{comf}} \pm 1.75^\circ\text{C}$
-* **Nighttime Sleep Compensation:**
-  - Awake metabolic rate ($M \approx 1.0\text{ met}$) vs. sleeping metabolic rate ($M \approx 0.7\text{ met}$).
-  - Daytime clothing ($I_{cl} \approx 0.5\text{ clo}$) vs. blankets/sleepwear ($I_{cl} \approx 1.2 - 1.5\text{ clo}$).
-  - Lower basal heat production + higher blanket insulation shifts the comfortable setpoint up by **+1.0°C**, preventing shivering or disturbed sleep.
-* **Hysteresis Deadband:**
-  - Once room temperature cools to the lower limit, the AC is switched OFF (0°).
-  - The AC only turns back ON (90°) when the room warms up to the upper comfort threshold.
-  - Between the two thresholds, the AC stays in its previous state, preventing compressor chatter.
-
----
-
-## 6. Academic Syllabus Mapping (First-Year Python)
-
-| Syllabus Requirement | Project Implementation |
-| :--- | :--- |
-| **Functions & Modular Design** | Pure functions in `weather_service.py`, `comfort_model.py`, `storage.py` |
-| **Conditionals (if/elif/else)** | Thermostat hysteresis decision branching and night-time mode detection |
-| **Lists, Dictionaries & Tuples** | State dictionaries, comfort range dicts, `(state, angle, reason)` tuples |
-| **File Handling (CSV)** | `storage.py` reading/writing `hostel_telemetry.csv` using `with open` |
-| **Exception Handling** | `try...except` handling API network drops with offline fallback |
-| **Networking & APIs** | `requests` querying Open-Meteo; Flask serving REST endpoints for ESP32 |
-| **Data Visualization** | Interactive Plotly time-series comfort bands & Streamlit Notion UI |
+*(If your ESP32-S3 is plugged into USB or connected to the mobile hotspot `eeeeee` / password `vv202526`, it will automatically stream live DHT11 readings into the dashboard every 2.5 seconds!)*

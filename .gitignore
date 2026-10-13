@@ -42,3 +42,7 @@ Thumbs.db
 ehthumbs.db
 Desktop.ini
 .DS_Store
+
+# PlatformIO build artifacts
+.pio/
+
