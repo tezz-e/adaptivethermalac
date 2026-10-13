@@ -1,8 +1,9 @@
-# Adaptive Thermal Comfort Advisory & Control System
-# Python 3 Dependencies
+# Adaptive Thermal Comfort AC Controller for Hostels
+# Python 3 Packages (Install with: py -m pip install -r requirements.txt)
 
-flask>=3.0.0
-requests>=2.31.0
-pandas>=2.0.0
-plotly>=5.18.0
-streamlit>=1.30.0
+flask>=3.0.0      # Runs the local HTTP API server (app.py on Port 5000)
+requests>=2.31.0  # Fetches live outdoor weather from wttr.in / Open-Meteo
+pandas>=2.0.0     # Reads and filters the CSV telemetry table
+plotly>=5.18.0    # Draws the interactive temperature vs. comfort band graph
+streamlit>=1.30.0 # Runs the live web dashboard (dashboard.py on Port 8501)
+pyserial>=3.5     # Reads live telemetry from the ESP32-S3 over USB Serial (COM12)
