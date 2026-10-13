@@ -183,11 +183,11 @@ with tab_hostel:
                 pass   # Flask not reachable — update local dict only, sync when available
 
     with ctrl_col2:
-        mode_options = ["Automatic (ASHRAE)", "Manual Override ON (90°)", "Manual Override OFF (0°)"]
+        mode_options = ["Automatic (ASHRAE)", "Manual Override ON (180°)", "Manual Override OFF (0°)"]
 
         def handle_mode_change():
             selected = st.session_state.get("ac_mode_radio")
-            if selected == "Manual Override ON (90°)":
+            if selected == "Manual Override ON (180°)":
                 mode = "ON"
             elif selected == "Manual Override OFF (0°)":
                 mode = "OFF"
@@ -205,7 +205,7 @@ with tab_hostel:
                     hostel_room["manual_override"] = (mode in ("ON", "OFF"))
                     hostel_room["override_state"]  = mode if mode in ("ON", "OFF") else None
                     hostel_room["ac_state"]        = data.get("ac_state", mode if mode in ("ON", "OFF") else hostel_room["ac_state"])
-                    hostel_room["servo_angle"]     = data.get("servo_angle", 90 if mode == "ON" else (0 if mode == "OFF" else hostel_room["servo_angle"]))
+                    hostel_room["servo_angle"]     = data.get("servo_angle", config.SERVO_ON_ANGLE if mode == "ON" else (config.SERVO_OFF_ANGLE if mode == "OFF" else hostel_room["servo_angle"]))
             except Exception:
                 pass
 
@@ -261,7 +261,7 @@ with tab_hostel:
 
         angle = hostel_room["servo_angle"]
         c3.metric("Servo Position (GPIO 18)", f"{angle}°")
-        c3.caption("Switch ON (90°)" if angle == 90 else "Switch OFF (0°)")
+        c3.caption(f"Switch ON ({config.SERVO_ON_ANGLE}°)" if angle == config.SERVO_ON_ANGLE else f"Switch OFF ({config.SERVO_OFF_ANGLE}°)")
 
         c4.metric("Target Setpoint", f"{live_band['optimal_temp']:.1f} °C")
         c4.caption(f"Band: {live_band['min_temp']:.1f} – {live_band['max_temp']:.1f} °C")
@@ -550,7 +550,7 @@ with tab_specs:
     # The keys become column headers. st.table() renders it as a static table.
     st.table(pd.DataFrame([
         {"Component": "ESP32-S3 DevKitC-1 N16R8",    "Pin / Interface": "WiFi + USB Serial",          "Role": "Microcontroller & HTTP/Serial client",        "Cost (Rs)": 400},
-        {"Component": "SG90 Micro Servo Motor",       "Pin / Interface": "GPIO 18 (50Hz PWM)",         "Role": "Physical AC switch actuator (0° / 90°)",      "Cost (Rs)": 150},
+        {"Component": "SG90 Micro Servo Motor",       "Pin / Interface": "GPIO 18 (50Hz PWM)",         "Role": "Physical AC switch actuator (0° / 180°)",     "Cost (Rs)": 150},
         {"Component": "1.3\" SH1106 I2C OLED",        "Pin / Interface": "SDA: GPIO 8, SCL: GPIO 9",   "Role": "Live on-board status display",                "Cost (Rs)": 212},
         {"Component": "DHT11 Sensor + Touch Button",  "Pin / Interface": "GPIO 4 (DHT), GPIO 10 (Touch)", "Role": "Room sensing & manual touch toggle",        "Cost (Rs)": 51},
         {"Component": "Total Prototype Cost",         "Pin / Interface": "-",                           "Role": "Complete physical unit",                      "Cost (Rs)": 813}

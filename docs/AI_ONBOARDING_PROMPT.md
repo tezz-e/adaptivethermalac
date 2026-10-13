@@ -38,7 +38,7 @@ The files you should read to understand the project:
   1. **Hardware (`ESP32-S3 DevKitC-1`, total cost ₹813):**
      - **DHT11 sensor (`GPIO 4`):** Reads live room temperature (°C) and humidity (%) every 2.5 seconds.
      - **TTP223 Capacitive Touch Button (`GPIO 10`):** Lets the resident tap to manually toggle the AC ON/OFF.
-     - **SG90 Micro Servo Motor (`GPIO 18`):** Mechanically pushes the AC switch (`0° = OFF`, `90° = ON`), powered by an external 5V adapter with shared GND.
+     - **SG90 Micro Servo Motor (`GPIO 18`):** Mechanically pushes the AC switch (`0° = OFF`, `180° = ON`), powered by an external 5V adapter with shared GND.
      - **1.3" SH1106 I2C OLED (`SDA = GPIO 8`, `SCL = GPIO 9`):** Displays live room temp, target temp, `DHT:LIVE`, and `SRV:RDY`/`SRV:ON`.
   2. **Python Backend & Math (`comfort_model.py`, `weather_service.py`, `app.py`, `storage.py`):**
      - Fetches live outdoor weather for **Katpadi, Vellore** (`wttr.in` station API, matching Google Weather, with `Open-Meteo` as fallback — cached for 5 minutes).

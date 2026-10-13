@@ -5,7 +5,7 @@ Saves and reads sensor telemetry using Python's built-in CSV file support.
 
 A CSV (Comma-Separated Values) file looks like a spreadsheet saved as plain text.
 Each row is one sensor reading + control decision. Example row:
-    2026-10-13 22:15:00,HOSTEL_D_312,27.4,63.0,25.0,23.5,26.5,ON,90,...
+    2026-10-13 22:15:00,HOSTEL_D_312,27.4,63.0,25.0,23.5,26.5,ON,180,...
 
 How file writing works in Python:
     We use the 'with open(...)' pattern (context manager). This guarantees the
@@ -38,7 +38,7 @@ CSV_HEADERS = [
     "comfort_min",      # lower edge of comfort band (target - 1.5°C)
     "comfort_max",      # upper edge of comfort band (target + 1.5°C)
     "ac_state",         # "ON" or "OFF"
-    "servo_angle",      # servo position in degrees (0 or 90)
+    "servo_angle",      # servo position in degrees (0 or 180)
     "explanation"       # plain-English reason for the AC decision
 ]
 

@@ -25,7 +25,7 @@ What is a REST API?
 Data flow on each ESP32 reading:
     ESP32 --(WiFi HTTP POST)--> /api/hostel/telemetry
     --> process_incoming_reading() evaluates ASHRAE comfort model
-    --> returns JSON {"ac_state": "ON", "servo_angle": 90, ...}
+    --> returns JSON {"ac_state": "ON", "servo_angle": 180, ...}
     --> ESP32 moves servo to the commanded angle
 
 Two background threads (always running in parallel with the server):
@@ -75,7 +75,7 @@ hostel_room_state = {
     "connection_mode": "STANDBY", # "WIFI_HTTP" or "USB_SERIAL (COM12)"
     "preferred_temp":  config.DEFAULT_PREFERRED_TEMP,
     "ac_state":        "OFF",     # "ON" or "OFF" — what the servo is currently doing
-    "servo_angle":     0,         # 0 = switch OFF, 90 = switch ON
+    "servo_angle":     0,         # 0 = switch OFF, 180 = switch ON
     "manual_override": False,     # True when the dashboard radio button forced ON/OFF
     "override_state":  None,      # "ON", "OFF", or None (AUTO)
     "last_ping":       None       # timestamp string of the last received ESP32 reading
@@ -147,7 +147,7 @@ def process_incoming_reading(room_temp, room_humidity, sensor_source="LIVE_DHT11
     # 1. Physical touch button tapped on the unit (adopt user's physical action immediately)
     if touch_override and esp_ac_state in ("ON", "OFF"):
         ac_state    = esp_ac_state
-        servo_angle = int(esp_servo_angle) if esp_servo_angle is not None else (90 if ac_state == "ON" else 0)
+        servo_angle = int(esp_servo_angle) if esp_servo_angle is not None else (config.SERVO_ON_ANGLE if ac_state == "ON" else config.SERVO_OFF_ANGLE)
         hostel_room_state["manual_override"] = True
         hostel_room_state["override_state"]  = ac_state
         reason      = f"Capacitive touch button override on GPIO 10 ({ac_state})."

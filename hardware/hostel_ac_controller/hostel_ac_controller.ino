@@ -95,7 +95,7 @@ unsigned long lastTelemetryTime = 0;
 
 // Servo Angles for Physical AC Switch Actuation
 const int ANGLE_OFF = 0;   // Physical switch OFF position (0 degrees)
-const int ANGLE_ON  = 90;  // Physical switch ON position (90 degrees)
+const int ANGLE_ON  = 180; // Physical switch ON position (180 degrees)
 
 // Autonomous ASHRAE Comfort Thresholds
 float targetOptimal = 25.0;
@@ -462,7 +462,7 @@ void setup() {
   // 3. Initialize Capacitive Touch Button on GPIO 10
   initTouchButton();
 
-  // 4. Initialize SG90 Servo Motor on GPIO 18 with Active Self-Test Sweep (0 -> 90 -> 0)
+  // 4. Initialize SG90 Servo Motor on GPIO 18 with Active Self-Test Sweep (0 -> 180 -> 0)
   if (initServoHardware()) {
     u8g2.clearBuffer();
     u8g2.drawFrame(0, 0, 128, 64);
@@ -471,7 +471,7 @@ void setup() {
     u8g2.drawHLine(10, 24, 108);
     u8g2.setFont(u8g2_font_6x10_tf);
     u8g2.drawStr(10, 38, "Pin: GPIO 18 (50Hz)");
-    u8g2.drawStr(10, 52, "Sweep: 0 -> 90 -> 0");
+    u8g2.drawStr(10, 52, "Sweep: 0 -> 180 -> 0");
     u8g2.sendBuffer();
 
     writeServoAngle(ANGLE_OFF);
@@ -482,7 +482,7 @@ void setup() {
     delay(350);
     currentServoAngle = ANGLE_OFF;
     currentAcState = "OFF";
-    Serial.println("[Servo INIT] Self-test sweep (0 -> 90 -> 0 deg) completed on GPIO 18.");
+    Serial.println("[Servo INIT] Self-test sweep (0 -> 180 -> 0 deg) completed on GPIO 18.");
   }
 
   // 5. Connect to WiFi Hotspot

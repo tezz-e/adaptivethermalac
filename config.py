@@ -48,11 +48,11 @@ NIGHT_COMFORT_OFFSET = 1.0  # Shift the target +1.0°C warmer during sleep
 # ---------------------------------------------------------------------------
 # SG90 Servo Motor Angles (GPIO 18)
 # The servo arm physically presses the wall AC switch:
-#   0 degrees  = arm retracted  = switch OFF
-#   90 degrees = arm extended   = switch ON
+#   0 degrees   = arm retracted  = switch OFF
+#   180 degrees = arm extended   = switch ON
 # ---------------------------------------------------------------------------
 SERVO_OFF_ANGLE = 0    # Servo angle that pushes AC switch to OFF position
-SERVO_ON_ANGLE  = 90   # Servo angle that pushes AC switch to ON position
+SERVO_ON_ANGLE  = 180  # Servo angle that pushes AC switch to ON position (full 180° throw)
 
 # ---------------------------------------------------------------------------
 # Default Resident Temperature Preference

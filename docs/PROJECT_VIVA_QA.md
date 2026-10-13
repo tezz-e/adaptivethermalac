@@ -33,7 +33,7 @@ Using simple functions and dictionaries makes the data flow completely transpare
 **Answer:**
 Each tool does the job it was designed for:
 1. **Flask (`app.py` on Port 5000 — Hardware Server):**
-   - The physical ESP32-S3 board needs a fast, lightweight URL (`POST /api/hostel/telemetry`) where it can send sensor JSON and get back a tiny JSON reply (`{"ac_state": "ON", "servo_angle": 90}`) in a few milliseconds.
+   - The physical ESP32-S3 board needs a fast, lightweight URL (`POST /api/hostel/telemetry`) where it can send sensor JSON and get back a tiny JSON reply (`{"ac_state": "ON", "servo_angle": 180}`) in a few milliseconds.
 2. **Streamlit (`dashboard.py` on Port 8501 — Human Web Interface):**
    - Humans need sliders, radio buttons, metric cards, and a live temperature graph in a web browser.
    - Our `run_system.py` script launches both servers together with a single command (`py run_system.py`).
@@ -51,7 +51,7 @@ This was a deliberate engineering decision based on what can actually be measure
 2. **Hostel Rooms Have a Physical Binary Switch:**
    - Hostel ACs are controlled by a simple ON/OFF rocker switch on the wall with no thermostat. Left ON at night, they overcool the room down to `19°C`.
 3. **Safe, Closed-Loop Hardware Solution:**
-   - By placing a `DHT11` temperature sensor (`GPIO 4`) and an `SG90` servo motor (`GPIO 18`) at the hostel wall switch, our ₹813 prototype physically turns the switch **OFF (`0°`)** when the room is cool and **ON (`90°`)** when it warms up — without touching dangerous 230V mains wires.
+   - By placing a `DHT11` temperature sensor (`GPIO 4`) and an `SG90` servo motor (`GPIO 18`) at the hostel wall switch, our ₹813 prototype physically turns the switch **OFF (`0°`)** when the room is cool and **ON (`180°`)** when it warms up — without touching dangerous 230V mains wires.
 
 ---
 
@@ -108,7 +108,7 @@ Instead of guessing fake kilowatt (kW) numbers without a power meter, `calculate
 **Answer:**
 Thermal comfort varies from person to person, so the dashboard includes a **Preferred Target Temperature Slider (`16.0°C to 32.0°C`)** plus an **Operating Mode selector**:
 * **Preferred Slider (`16.0°C – 32.0°C`):** Centers the `±1.5°C` comfort band around whatever temperature the student chooses (for example, `24.0°C` gives a band of `22.5°C – 25.5°C`).
-* **Dashboard Manual Override:** Lets the student force the switch **ON (`90°`)** or **OFF (`0°`)** from their laptop browser.
+* **Dashboard Manual Override:** Lets the student force the switch **ON (`180°`)** or **OFF (`0°`)** from their laptop browser.
 * **Physical Touch Button (`GPIO 10`):** Lets the student tap the capacitive touch sensor on the wall unit to toggle the AC switch immediately without opening a laptop.
 
 ---
@@ -127,7 +127,7 @@ This rapid clicking is called **switch chatter / hunting**.
 
 **How Our `±1.5°C` Hysteresis Deadband Solves It (for a `25.0°C` target):**
 * **Lower Limit (`23.5°C`):** Room has cooled down enough → Turn AC **OFF (`0°`)**.
-* **Upper Limit (`26.5°C`):** Room has warmed up enough → Turn AC **ON (`90°`)**.
+* **Upper Limit (`26.5°C`):** Room has warmed up enough → Turn AC **ON (`180°`)**.
 * **Inside the Band (`23.5°C to 26.5°C`):** **Keep the previous state!** If the AC was ON, it stays ON until the room reaches `23.5°C`. If it was OFF, it stays OFF until the room warms back up to `26.5°C`.
 
 ---
@@ -149,7 +149,7 @@ This rapid clicking is called **switch chatter / hunting**.
 The ESP32-S3 firmware (`hostel_ac_controller.ino`) has a built-in **Local Autonomous Hysteresis Failsafe**:
 * Every time the ESP32 talks to the Flask server, it saves the latest `comfortMin` and `comfortMax` limits in its own memory (defaulting to `23.5°C – 26.5°C`).
 * If WiFi disconnects or the laptop is turned off, the ESP32 automatically switches to its internal `evaluateLocalHysteresis()` function.
-* It keeps reading the `DHT11` sensor on `GPIO 4` every 2.5 seconds and turns the servo **OFF (`0°`)** if the room drops to `comfortMin` and **ON (`90°`)** if it rises to `comfortMax`. The student is never left freezing!
+* It keeps reading the `DHT11` sensor on `GPIO 4` every 2.5 seconds and turns the servo **OFF (`0°`)** if the room drops to `comfortMin` and **ON (`180°`)** if it rises to `comfortMax`. The student is never left freezing!
 
 ---
 

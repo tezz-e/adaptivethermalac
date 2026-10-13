@@ -138,7 +138,7 @@ def evaluate_hostel_ac_decision(room_temp, min_temp, max_temp, last_ac_state="OF
 
     The three possible outcomes:
         1. Room is too cold (<= min_temp) --> Turn AC OFF (servo 0°)
-        2. Room is too hot  (>= max_temp) --> Turn AC ON  (servo 90°)
+        2. Room is too hot  (>= max_temp) --> Turn AC ON  (servo 180°)
         3. Room is inside the band        --> Keep previous state (no change)
 
     Why "keep previous state" inside the band?
@@ -155,7 +155,7 @@ def evaluate_hostel_ac_decision(room_temp, min_temp, max_temp, last_ac_state="OF
 
     Returns:
         A 3-item tuple: (ac_state, servo_angle, explanation_string)
-        Example: ("ON", 90, "Room temp (27.2°C) reached upper limit (26.5°C). AC switched ON.")
+        Example: ("ON", 180, "Room temp (27.2°C) reached upper limit (26.5°C). AC switched ON.")
     """
     if room_temp <= min_temp:
         # Room has cooled down to the lower edge — switch AC OFF

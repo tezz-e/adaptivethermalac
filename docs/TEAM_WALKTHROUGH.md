@@ -32,7 +32,7 @@ Think of our hardware box like a tiny robot assistant sitting next to the wall s
 | **ESP32-S3 DevKitC-1** | USB-C (`COM12`) | **The Brain:** A small WiFi + USB microcontroller board that reads the sensors and controls the motor. |
 | **DHT11 Sensor** | **`GPIO 4`** | **The Thermometer:** Reads real-time room temperature (°C) and humidity (%) every 2.5 seconds. |
 | **TTP223 Touch Button** | **`GPIO 10`** | **Manual Touch Button:** Tap it with your finger at any time to manually flip the AC ON or OFF. |
-| **SG90 Micro Servo** | **`GPIO 18`** | **The Mechanical Finger:** Moves to **`0°`** to push the AC switch **OFF**, or **`90°`** to push the AC switch **ON**. Powered by an external 5V adapter (with shared ground) so it has strong torque. |
+| **SG90 Micro Servo** | **`GPIO 18`** | **The Mechanical Finger:** Moves to **`0°`** to push the AC switch **OFF**, or **`180°`** to push the AC switch **ON**. Powered by an external 5V adapter (with shared ground) so it has strong torque. |
 | **1.3" SH1106 OLED** | **`GPIO 8` (SDA), `GPIO 9` (SCL)** | **The Mini Screen:** Shows live room temperature, target temperature, `DHT:LIVE`, and `SRV:RDY` / `SRV:ON`. |
 
 ---
@@ -57,7 +57,7 @@ Think of our hardware box like a tiny robot assistant sitting next to the wall s
 * **What is Hysteresis (`±1.5°C` Deadband)?**  
   If the target is **25.0°C**, we create a comfort buffer from **23.5°C to 26.5°C**:
   - When the room cools down to **23.5°C or below** → Turn AC **OFF (`0°`)**.
-  - When the room warms up to **26.5°C or above** → Turn AC **ON (`90°`)**.
+  - When the room warms up to **26.5°C or above** → Turn AC **ON (`180°`)**.
   - Anywhere in between (**23.5°C to 26.5°C**) → **Keep the current state!** This prevents the motor from clicking back and forth every 10 seconds ("switch chatter").
 
 ---
@@ -71,7 +71,7 @@ We wrote the entire Python project using **only basic first-year Python** (`def`
 * `CAMPUS_LATITUDE = 12.9692`, `CAMPUS_LONGITUDE = 79.1559` (Katpadi, Vellore)
 * `ASHRAE_INTERCEPT = 17.8`, `ASHRAE_SLOPE = 0.31`
 * `NIGHT_START_HOUR = 22` (10 PM), `NIGHT_END_HOUR = 7` (7 AM), `NIGHT_COMFORT_OFFSET = 1.0`
-* `SERVO_OFF_ANGLE = 0`, `SERVO_ON_ANGLE = 90`
+* `SERVO_OFF_ANGLE = 0`, `SERVO_ON_ANGLE = 180`
 * `DEFAULT_PREFERRED_TEMP = 25.0`
 * `CSV_FILE_PATH = "data/hostel_telemetry.csv"`
 
@@ -98,7 +98,7 @@ We wrote the entire Python project using **only basic first-year Python** (`def`
 **One job:** Act as the middleman between the ESP32 hardware and the Streamlit dashboard.
 * **What is Flask?** A lightweight Python web server that listens for incoming messages on port `5000`.
 * **4 Simple Routes:**
-  1. `POST /api/hostel/telemetry` — ESP32 sends live DHT11 temperature & humidity here every 2.5 seconds; `app.py` runs `comfort_model.py` and replies with `{"ac_state": "ON", "servo_angle": 90}`.
+  1. `POST /api/hostel/telemetry` — ESP32 sends live DHT11 temperature & humidity here every 2.5 seconds; `app.py` runs `comfort_model.py` and replies with `{"ac_state": "ON", "servo_angle": 180}`.
   2. `GET /api/hostel/status` — Dashboard reads the current room state from here every 2.5 seconds.
   3. `POST /api/hostel/preference` — Dashboard sends the slider temperature (`16°C–32°C`) here.
   4. `POST /api/hostel/override` — Dashboard sends the operating mode (`AUTO`, `ON`, or `OFF`) here.
@@ -119,7 +119,7 @@ We wrote the entire Python project using **only basic first-year Python** (`def`
 **One job:** Code flashed directly onto the ESP32-S3 chip using the Arduino IDE.
 * Written in Arduino C++ (has a plain-English header at the top explaining how it works for Python students).
 * `setup()` runs once when powered on to start the OLED screen, DHT11 sensor, touch button, servo motor, and WiFi.
-* `loop()` runs forever: checks the touch button on `GPIO 10`, reads DHT11 temp/humidity on `GPIO 4` every 2.5 seconds, sends it to the laptop, moves the servo on `GPIO 18` (`0°` or `90°`), and updates the OLED screen.
+* `loop()` runs forever: checks the touch button on `GPIO 10`, reads DHT11 temp/humidity on `GPIO 4` every 2.5 seconds, sends it to the laptop, moves the servo on `GPIO 18` (`0°` or `180°`), and updates the OLED screen.
 
 ---
 
@@ -129,7 +129,7 @@ We wrote the entire Python project using **only basic first-year Python** (`def`
 2. The **ESP32-S3** sends that reading to `app.py` on the laptop (over WiFi or USB cable).
 3. `app.py` gets the outdoor temperature from `weather_service.py` and asks `comfort_model.py` if the AC should be `ON` or `OFF`.
 4. `storage.py` saves the reading and decision as a new row in `data/hostel_telemetry.csv`.
-5. `app.py` replies to the **ESP32-S3** with the target servo angle (`0°` for OFF, `90°` for ON), and the **SG90 servo (`GPIO 18`)** physically flips the wall switch.
+5. `app.py` replies to the **ESP32-S3** with the target servo angle (`0°` for OFF, `180°` for ON), and the **SG90 servo (`GPIO 18`)** physically flips the wall switch.
 6. Meanwhile, `dashboard.py` reads the latest status from `app.py` and updates the metrics and graph on your laptop screen.
 
 ---
@@ -148,7 +148,7 @@ Split these 5 roles among your team so everyone has a clear 45-second explanatio
 > *"I worked on the thermal run-time analytics in `calculate_runtime_reduction()` and Tab 2 of the dashboard. Because hostel cooling comes from a centralized plant where chiller wattage isn't accessible to students, we don't guess fake kW numbers. Instead, we measure indoor temperature and time directly: turning the switch off for 4 out of 8 sleep hours cuts active cooling run-time by 50% and prevents 16 degree-hours of freezing overcooling overnight."*
 
 ### Speaker 4: Hardware, ESP32-S3 Firmware & Flask Server (`app.py` & `hostel_ac_controller.ino`)
-> *"I integrated the physical ESP32-S3 hardware with our Flask server. The ESP32-S3 reads the DHT11 sensor on GPIO 4, drives the SG90 servo on GPIO 18 between 0 and 90 degrees, shows live status on the OLED on GPIO 8 and 9, and supports manual touch toggling on GPIO 10. It sends telemetry every 2.5 seconds over both WiFi HTTP and USB Serial. `app.py` receives this data, runs the comfort model, and replies with the servo command."*
+> *"I integrated the physical ESP32-S3 hardware with our Flask server. The ESP32-S3 reads the DHT11 sensor on GPIO 4, drives the SG90 servo on GPIO 18 between 0 and 180 degrees, shows live status on the OLED on GPIO 8 and 9, and supports manual touch toggling on GPIO 10. It sends telemetry every 2.5 seconds over both WiFi HTTP and USB Serial. `app.py` receives this data, runs the comfort model, and replies with the servo command."*
 
 ### Speaker 5: CSV Storage, Dashboard & Offline Failsafe (`storage.py` & `dashboard.py`)
 > *"I built the CSV storage module using Python's `with open` context manager to log every reading to `hostel_telemetry.csv`, and the Streamlit dashboard with an auto-scaling Plotly comfort graph. The graph automatically adjusts from raw 2.5-second readings to 10-second, 30-second, and 2-minute intervals as the session runs longer. I also verified the ESP32's offline failsafe: if WiFi disconnects while residents are asleep, the board automatically runs its own local hysteresis check so the room never freezes."*
