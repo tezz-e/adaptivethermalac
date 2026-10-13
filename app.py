@@ -143,20 +143,22 @@ def process_incoming_reading(room_temp, room_humidity, sensor_source="LIVE_DHT11
     # Remember what the previous AC state was, so hysteresis can "stay put" when inside the band
     prev_ac_state = hostel_room_state.get("ac_state", "OFF")
 
-    # Step 3: Decide ON/OFF using the override priority chain
-    # Dashboard manual override (highest priority: explicit user command from web dashboard)
-    if hostel_room_state["manual_override"] and hostel_room_state["override_state"] in ("ON", "OFF"):
+    # Step 3: Decide ON/OFF using the unified control priority
+    # 1. Physical touch button tapped on the unit (adopt user's physical action immediately)
+    if touch_override and esp_ac_state in ("ON", "OFF"):
+        ac_state    = esp_ac_state
+        servo_angle = int(esp_servo_angle) if esp_servo_angle is not None else (90 if ac_state == "ON" else 0)
+        hostel_room_state["manual_override"] = True
+        hostel_room_state["override_state"]  = ac_state
+        reason      = f"Capacitive touch button override on GPIO 10 ({ac_state})."
+
+    # 2. Dashboard manual override (user explicitly forced ON or OFF in web browser)
+    elif hostel_room_state["manual_override"] and hostel_room_state["override_state"] in ("ON", "OFF"):
         ac_state    = hostel_room_state["override_state"]
         servo_angle = config.SERVO_ON_ANGLE if ac_state == "ON" else config.SERVO_OFF_ANGLE
         reason      = f"Manual override active ({ac_state})."
 
-    # Physical button pressed on the unit (secondary priority: local touch toggle)
-    elif touch_override and esp_ac_state in ("ON", "OFF"):
-        ac_state    = esp_ac_state
-        servo_angle = int(esp_servo_angle) if esp_servo_angle is not None else (90 if ac_state == "ON" else 0)
-        reason      = f"Capacitive touch button override on GPIO 10 ({ac_state})."
-
-    # Automatic ASHRAE hysteresis (default: intelligent temperature control)
+    # 3. Automatic ASHRAE hysteresis (default: intelligent temperature control)
     else:
         ac_state, servo_angle, reason = comfort_model.evaluate_hostel_ac_decision(
             room_temp=room_temp,

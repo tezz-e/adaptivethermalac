@@ -137,15 +137,14 @@ void holdServoAngleLedc(int angle) {
   ledcWrite(SERVO_LEDC_CH, dutyTicks);
 }
 
-void writeServoAngle(int angle, int pulseCount = 22) {
+void writeServoAngle(int angle, int pulseCount = 26) {
   if (angle < 0) angle = 0;
   if (angle > 180) angle = 180;
 
   uint32_t pulseUs = map(angle, 0, 180, SERVO_MIN_US, SERVO_MAX_US);
   uint32_t lowUs = 20000UL - pulseUs;
 
-  // Detach LEDC briefly and drive direct hardware-timed 50Hz pulses on GPIO 18
-  // Guarantees 100% physical actuation regardless of timer/LEDC state
+  // Detach any background timer and drive clean, direct hardware-timed 50Hz pulses on GPIO 18
   ledcDetachPin(SERVO_PIN);
   pinMode(SERVO_PIN, OUTPUT);
   for (int i = 0; i < pulseCount; i++) {
@@ -155,9 +154,9 @@ void writeServoAngle(int angle, int pulseCount = 22) {
     delayMicroseconds(lowUs);
   }
 
-  // Re-attach hardware LEDC 50Hz PWM to maintain holding torque continuously
-  ledcAttachPin(SERVO_PIN, SERVO_LEDC_CH);
-  holdServoAngleLedc(angle);
+  // Mechanical switch is clicked into position! Relax signal line to LOW.
+  // This cuts continuous stall current, stops motor heating/buzzing, and prevents runaway rotation!
+  digitalWrite(SERVO_PIN, LOW);
 }
 
 bool initServoHardware() {
@@ -285,6 +284,9 @@ void updateDisplay(float temp, float hum, String acState, int servoAngle, bool o
 // 5. SERVO ACTUATION FUNCTION
 // --------------------------------------------------------------------------------------
 void setAcSwitch(int targetAngle, String newState) {
+  if (targetAngle == currentServoAngle && newState == currentAcState) {
+    return; // Already in target position — do not redundantly stroke servo!
+  }
   Serial.printf("[Servo] Actuating AC switch on GPIO %d -> %d deg (AC: %s)\n",
                 SERVO_PIN, targetAngle, newState.c_str());
   writeServoAngle(targetAngle);
@@ -339,8 +341,15 @@ void checkCapacitiveButton() {
     isTouched = (digitalRead(TOUCH_BTN_PIN) == LOW);
   }
 
-  // Rising edge detection with 280ms debounce
-  if (isTouched && !lastTouchActive && (millis() - lastTouchTime > 280)) {
+  // Noise filter: verify signal remains stable for 15ms to filter out electrical spikes from servo movement
+  if (isTouched) {
+    delay(15);
+    if (touchMode == 0) isTouched = (digitalRead(TOUCH_BTN_PIN) == HIGH);
+    else if (touchMode == 1) isTouched = (digitalRead(TOUCH_BTN_PIN) == LOW);
+  }
+
+  // Rising edge detection with 650ms debounce
+  if (isTouched && !lastTouchActive && (millis() - lastTouchTime > 650)) {
     lastTouchTime = millis();
     manualTouchOverride = true;
 
@@ -587,9 +596,6 @@ void loop() {
       Serial.printf("[Sensor: SIMULATED] No DHT11 on GPIO 4 -> Fallback: %.1f C, %.0f %%\n",
                     currentTemp, currentHum);
     }
-
-    // Re-assert servo PWM angle every cycle to ensure servo holds position
-    holdServoAngleLedc(currentServoAngle);
 
     // Emit structured JSON line over USB Serial for local bridge/monitoring
     Serial.printf("[TELEMETRY_JSON] {\"temperature\":%.1f,\"humidity\":%.1f,\"sensor_source\":\"%s\",\"servo_status\":\"%s\",\"servo_pullup\":%d,\"touch_pullup\":%d,\"touch_override\":%s,\"ac_state\":\"%s\",\"servo_angle\":%d}\n",
