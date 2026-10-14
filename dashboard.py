@@ -582,7 +582,7 @@ with tab_specs:
     # pd.DataFrame([list of dicts]) creates a table where each dict is one row.
     # The keys become column headers. st.table() renders it as a static table.
     st.table(pd.DataFrame([
-        {"Component": "ESP32-S3 DevKitC-1 N16R8",    "Pin / Interface": "WiFi + USB Serial",          "Role": "Microcontroller & HTTP/Serial client",        "Cost (Rs)": 400},
+        {"Component": "ESP32 Microcontroller (NodeMCU / WROOM)", "Pin / Interface": "WiFi + USB Serial",          "Role": "Microcontroller & HTTP/Serial client",        "Cost (Rs)": 400},
         {"Component": "SG90 Micro Servo Motor",       "Pin / Interface": "GPIO 18 (50Hz PWM)",         "Role": "Physical AC switch actuator (0° / 180°)",     "Cost (Rs)": 150},
         {"Component": "1.3\" SH1106 I2C OLED",        "Pin / Interface": "SDA: GPIO 8, SCL: GPIO 9",   "Role": "Live on-board status display",                "Cost (Rs)": 212},
         {"Component": "DHT11 Sensor + Touch Button",  "Pin / Interface": "GPIO 4 (DHT), GPIO 10 (Touch)", "Role": "Room sensing & manual touch toggle",        "Cost (Rs)": 51},

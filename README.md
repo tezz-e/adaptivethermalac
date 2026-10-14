@@ -49,11 +49,11 @@ The entire Python backend and dashboard is just **7 clean files** (plus 1 Arduin
 
 ---
 
-## 3. Hardware Pinout (ESP32-S3 DevKitC-1, Total BOM: ₹813)
+## 3. Hardware Pinout (ESP32 Base / Prototype BOM: ₹813)
 
-| Component | ESP32-S3 Pin | Power & Wiring Notes | Cost (₹) |
+| Component | ESP32 Pin | Power & Wiring Notes | Cost (₹) |
 | :--- | :--- | :--- | :---: |
-| **ESP32-S3 DevKitC-1 N16R8** | USB-C (`your COM port`) | Powered via USB cable connected to laptop | 400 |
+| **ESP32 Microcontroller (NodeMCU / WROOM)** | USB (`your COM port`) | Powered via USB cable connected to laptop | 400 |
 | **DHT11 Temperature & Humidity Sensor** | `GPIO 4` (Data) | `VCC` → `3V3`, `GND` → `GND` | 51 |
 | **TTP223 Capacitive Touch Button** | `GPIO 10` (`I/O`) | `VCC` → `3V3`, `GND` → `GND` (toggles servo `0°`/`180°` on touch) | *(incl.)* |
 | **1.3" SH1106 I2C OLED Display** | `SDA = GPIO 8`, `SCL = GPIO 9` | `VCC` → `3V3`, `GND` → `GND` (I2C address `0x3C`) | 212 |

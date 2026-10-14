@@ -29,7 +29,7 @@ Think of our hardware box like a tiny robot assistant sitting next to the wall s
 
 | Part | Pin on ESP32-S3 | What It Does in Plain English |
 | :--- | :---: | :--- |
-| **ESP32-S3 DevKitC-1** | USB-C (`COM12`) | **The Brain:** A small WiFi + USB microcontroller board that reads the sensors and controls the motor. |
+| **ESP32 Microcontroller (NodeMCU / WROOM)** | USB / Serial | **The Brain:** A small WiFi + USB microcontroller board that reads the sensors and controls the motor (BOM ₹400 baseline; prototype tested on ESP32-S3). |
 | **DHT11 Sensor** | **`GPIO 4`** | **The Thermometer:** Reads real-time room temperature (°C) and humidity (%) every 2.5 seconds. |
 | **TTP223 Touch Button** | **`GPIO 10`** | **Manual Touch Button:** Tap it with your finger at any time to manually flip the AC ON or OFF. |
 | **SG90 Micro Servo** | **`GPIO 18`** | **The Mechanical Finger:** Moves to **`0°`** to push the AC switch **OFF**, or **`180°`** to push the AC switch **ON**. Powered by an external 5V adapter (with shared ground) so it has strong torque. |

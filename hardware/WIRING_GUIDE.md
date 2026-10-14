@@ -1,6 +1,6 @@
 # ESP32-S3 Hardware Wiring Guide
 
-This guide details the exact pin connections for the **Hostel AC Physical Control Unit** running on the **ESP32-S3 DevKitC-1 N16R8** (Total BOM: ₹813).
+This guide details the exact pin connections for the **Hostel AC Physical Control Unit** running on the ESP32 (baseline BOM: ₹813 using standard ESP32 NodeMCU / WROOM at ₹400; prototype tested on ESP32-S3 DevKitC-1 N16R8).
 
 ---
 
