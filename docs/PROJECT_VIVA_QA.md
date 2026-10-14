@@ -92,22 +92,23 @@ Because of blankets and lower metabolism, `get_hostel_comfort_band()` automatica
 ### Q6. How do you measure savings when you don't know the hostel chiller's electrical wattage?
 
 **Answer:**
-Instead of guessing fake kilowatt (kW) numbers without a power meter, `calculate_runtime_reduction()` measures two direct physical quantities:
+We do not claim energy (kWh) savings because we do not have an electrical power meter on the chiller. Instead, Tab 2 provides an **illustrative scenario calculation**:
 1. **Active Cooling Run-Time Reduction (%):**
    ```text
    Run-Time Reduction (%) = (Hours AC Switched OFF / 8.0 Sleep Hours) * 100
    ```
-   If our controller turns the AC off for `4 hours` out of an `8-hour` night, it reduces active cooling run-time by **50%**.
+   Assuming a wall-switch AC would otherwise run all 8 hours overnight, turning it off for `4 hours` reduces active cooling run-time by **50%**.
 2. **Overcooling Degree-Hours Avoided (°C·hr):**
-   Measures how much excess chilling was prevented (`Hours OFF * 4.0°C = 16.0 °C·hr` for a 4-hour shutoff).
+   An illustrative scenario metric (`Hours OFF * 4.0°C/hr = 16.0 °C·hr` for 4 hours off) showing the scale of avoided overcooling. No energy (kWh) is claimed.
 
 ---
 
 ### Q7. What if a student wants a colder or warmer room than the formula suggests?
 
 **Answer:**
-Thermal comfort varies from person to person, so the dashboard includes a **Preferred Target Temperature Slider (`16.0°C to 32.0°C`)** plus an **Operating Mode selector**:
-* **Preferred Slider (`16.0°C – 32.0°C`):** Centers the `±1.5°C` comfort band around whatever temperature the student chooses (for example, `24.0°C` gives a band of `22.5°C – 25.5°C`).
+Thermal comfort varies from person to person, so the dashboard includes a **Setpoint source selector** ("ASHRAE Auto" / "My preference" with a `16.0°C to 32.0°C` slider) plus an **Operating Mode selector**:
+* **ASHRAE Auto:** Automatically calculates the optimal target from live Katpadi outdoor weather (`comfort_model.py`).
+* **Preferred Slider (`16.0°C – 32.0°C`):** Centers the `±1.5°C` control deadband around whatever temperature the student chooses (for example, `24.0°C` gives a band of `22.5°C – 25.5°C`).
 * **Dashboard Manual Override:** Lets the student force the switch **ON (`180°`)** or **OFF (`0°`)** from their laptop browser.
 * **Physical Touch Button (`GPIO 10`):** Lets the student tap the capacitive touch sensor on the wall unit to toggle the AC switch immediately without opening a laptop.
 
@@ -125,7 +126,8 @@ If our target temperature is `25.0°C` and we had no deadband buffer, the servo 
 
 This rapid clicking is called **switch chatter / hunting**.
 
-**How Our `±1.5°C` Hysteresis Deadband Solves It (for a `25.0°C` target):**
+**How Our `±1.5°C` Control Deadband Solves It (Our Engineering Design Choice):**
+* The `±1.5°C` buffer is not part of the ASHRAE comfort formula; it is our deliberate control deadband designed to prevent switch and servo chatter.
 * **Lower Limit (`23.5°C`):** Room has cooled down enough → Turn AC **OFF (`0°`)**.
 * **Upper Limit (`26.5°C`):** Room has warmed up enough → Turn AC **ON (`180°`)**.
 * **Inside the Band (`23.5°C to 26.5°C`):** **Keep the previous state!** If the AC was ON, it stays ON until the room reaches `23.5°C`. If it was OFF, it stays OFF until the room warms back up to `26.5°C`.
@@ -161,7 +163,7 @@ The ESP32-S3 firmware (`hostel_ac_controller.ino`) has a built-in **Local Autono
 
 | Python Syllabus Topic | File & Function | How We Used It |
 | :--- | :--- | :--- |
-| **Variables & Constants** | `config.py` | Stores coordinates, ASHRAE constants (`17.8`, `0.31`), and pin angles in one file. |
+| **Variables & Constants** | `config.py` | Stores coordinates, ASHRAE constants (`17.8`, `0.31`), control deadband (`1.5`), and pin angles in one file. |
 | **Functions (`def`)** | `comfort_model.py` | 4 modular functions (`calculate_ashrae_comfort`, `get_hostel_comfort_band`, `evaluate_hostel_ac_decision`, `calculate_runtime_reduction`). |
 | **Conditionals (`if/elif/else`)** | `comfort_model.py` | 3-branch hysteresis check (`<= min_temp`, `>= max_temp`, `else` keep state) and night mode check. |
 | **Dictionaries (`{}`) & Tuples (`()`)** | `app.py`, `comfort_model.py` | `hostel_room_state` dictionary and `(ac_state, servo_angle, reason)` return tuple. |
@@ -171,10 +173,13 @@ The ESP32-S3 firmware (`hostel_ac_controller.ino`) has a built-in **Local Autono
 
 ---
 
-## 7. Limitations & Future Scope
+## 7. Limitations & Known Engineering Behaviors
 
-### Q12. What are the limitations of this prototype, and how could you improve it in the future?
+### Q12. What are the known limitations and behaviors of this prototype?
 
 **Answer:**
-1. **Sensor Precision:** The `DHT11` sensor has a `±2.0°C` accuracy tolerance. Upgrading to a `BME280` or `DHT22` sensor (`±0.5°C` accuracy) would make temperature switching even more precise.
-2. **Future Upgrade — Infrared (IR) LED Transmitter:** For hostel rooms that have split ACs with remote controls, we could add a ₹15 IR LED to the ESP32 to send infrared remote signals directly instead of moving a mechanical servo arm.
+1. **Touch Button Latches Manual Override:** Tapping the physical capacitive touch button (GPIO 10) sets `manual_override = True` to preserve the user's manual physical toggle until the resident explicitly switches back to "Automatic (ASHRAE)" from the dashboard.
+2. **DHT11 Sensor Precision:** The low-cost `DHT11` sensor has a `±2.0°C` accuracy tolerance, which is wider than the `±1.5°C` control deadband. In a production version, upgrading to a `BME280` or `DHT22` (`±0.5°C` accuracy) would improve precision.
+3. **Instantaneous vs. Prevailing Mean Outdoor Temperature:** ASHRAE 55 specifies the adaptive model using prevailing mean outdoor temperature (an exponentially weighted 7-to-30 day running average). For this prototype, we use the real-time instantaneous outdoor temperature from `wttr.in` / Open-Meteo for simplicity and responsiveness.
+4. **Single-Room Shared State:** The Flask server uses a Python module-level dictionary (`hostel_room_state`) without threading locks, which is clean, beginner-friendly, and completely adequate for a single-room prototype.
+5. **Overnight Savings is an Illustrative Scenario:** Tab 2 is an educational scenario calculator demonstrating run-time reduction based on user-selected hours off; it is not measured kWh energy data.

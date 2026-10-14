@@ -54,11 +54,12 @@ Think of our hardware box like a tiny robot assistant sitting next to the wall s
 * **Why do we add `+1.0°C` at night (10:00 PM – 7:00 AM)?**  
   When you sleep, your body's heat production (metabolic rate) drops by 30% (from `1.0 met` awake to `0.7 met` sleeping), and you sleep under a blanket (`1.2 to 1.5 clo` insulation). Adding `+1.0°C` overnight prevents you from waking up freezing.
 
-* **What is Hysteresis (`±1.5°C` Deadband)?**  
-  If the target is **25.0°C**, we create a comfort buffer from **23.5°C to 26.5°C**:
+* **What is the Control Deadband (`±1.5°C`)?**  
+  Our design choice to prevent the motor from clicking back and forth every 10 seconds ("switch chatter").
+  If the target is **25.0°C**, we create a buffer from **23.5°C to 26.5°C**:
   - When the room cools down to **23.5°C or below** → Turn AC **OFF (`0°`)**.
   - When the room warms up to **26.5°C or above** → Turn AC **ON (`180°`)**.
-  - Anywhere in between (**23.5°C to 26.5°C**) → **Keep the current state!** This prevents the motor from clicking back and forth every 10 seconds ("switch chatter").
+  - Anywhere in between (**23.5°C to 26.5°C**) → **Keep the current state!**
 
 ---
 
@@ -70,24 +71,25 @@ We wrote the entire Python project using **only basic first-year Python** (`def`
 **One job:** Store all fixed numbers in one place so nothing is hardcoded across the project.
 * `CAMPUS_LATITUDE = 12.9692`, `CAMPUS_LONGITUDE = 79.1559` (Katpadi, Vellore)
 * `ASHRAE_INTERCEPT = 17.8`, `ASHRAE_SLOPE = 0.31`
+* `COMFORT_BAND_HALF_WIDTH = 1.5` (our control deadband)
 * `NIGHT_START_HOUR = 22` (10 PM), `NIGHT_END_HOUR = 7` (7 AM), `NIGHT_COMFORT_OFFSET = 1.0`
 * `SERVO_OFF_ANGLE = 0`, `SERVO_ON_ANGLE = 180`
-* `DEFAULT_PREFERRED_TEMP = 25.0`
+* `DEFAULT_PREFERRED_TEMP = None` (None = ASHRAE auto calculation)
 * `CSV_FILE_PATH = "data/hostel_telemetry.csv"`
 
-### File 2: `weather_service.py` (Live Outdoor Weather)
+### File 2: `weather_service.py` (Outdoor Weather)
 **One job:** Fetch the real-time outdoor temperature and humidity for Katpadi, Vellore and return it as a Python dictionary.
-* **Primary API:** Queries the live Katpadi weather station (`wttr.in/Katpadi,Vellore?format=j1`, which matches Google Weather) using `requests.get()`.
+* **Primary API:** Queries nearest-station/model data (`wttr.in/Katpadi,Vellore?format=j1`) using `requests.get()`.
 * **Fallback API:** Uses `Open-Meteo` GPS coordinates if the primary link is busy.
 * **5-Minute Cache:** Saves the last weather reading in memory for 300 seconds (`5 minutes`) so the dashboard refreshes instantly without spamming the internet.
-* **Offline Backup (`try/except`):** If the mobile hotspot has no internet, it safely returns `34.0°C, 45% RH` so the program never crashes.
+* **Offline Backup (`try/except`):** If the hotspot has no internet, it safely returns `34.0°C, 45% RH` so the program never crashes.
 
 ### File 3: `comfort_model.py` (The Math and Decision Brain)
 **One job:** Four simple functions that do all the temperature math and the ON/OFF decision:
-1. `calculate_ashrae_comfort(outdoor_temp)`: Runs `17.8 + (0.31 * outdoor_temp)`.
-2. `get_hostel_comfort_band(outdoor_temp, current_hour, preferred_temp)`: Adds `+1.0°C` if it is nighttime (`22:00 to 07:00`) and returns a dictionary with `optimal_temp`, `min_temp` (`-1.5°C`), and `max_temp` (`+1.5°C`).
+1. `calculate_ashrae_comfort(outdoor_temp)`: Runs `17.8 + (0.31 * outdoor_temp)` (outdoor temp clamped between 10.0°C and 33.5°C).
+2. `get_hostel_comfort_band(outdoor_temp, current_hour, preferred_temp)`: Calculates ASHRAE adaptive target (or uses preferred_temp if set), adds `+1.0°C` if nighttime (`22:00 to 07:00`), and returns a dictionary with `optimal_temp`, `min_temp`, and `max_temp` using `COMFORT_BAND_HALF_WIDTH`.
 3. `evaluate_hostel_ac_decision(room_temp, min_temp, max_temp, last_ac_state)`: Runs the `if / elif / else` hysteresis check and returns a 3-item tuple: `(ac_state, servo_angle, explanation)`.
-4. `calculate_runtime_reduction(hours_ac_off)`: Calculates the percentage of overnight cooling time saved (`(hours_off / 8.0) * 100`) and degree-hours of overcooling prevented.
+4. `calculate_runtime_reduction(hours_ac_off)`: Illustrative scenario calculating cooling time saved (`(hours_off / 8.0) * 100`) and degree-hours of overcooling prevented (no kWh claimed).
 
 ### File 4: `storage.py` (CSV File Handling)
 **One job:** Save each sensor reading as a new row in a CSV spreadsheet, and read that spreadsheet back for the graph and download button.
@@ -100,14 +102,14 @@ We wrote the entire Python project using **only basic first-year Python** (`def`
 * **4 Simple Routes:**
   1. `POST /api/hostel/telemetry` — ESP32 sends live DHT11 temperature & humidity here every 2.5 seconds; `app.py` runs `comfort_model.py` and replies with `{"ac_state": "ON", "servo_angle": 180}`.
   2. `GET /api/hostel/status` — Dashboard reads the current room state from here every 2.5 seconds.
-  3. `POST /api/hostel/preference` — Dashboard sends the slider temperature (`16°C–32°C`) here.
+  3. `POST /api/hostel/preference` — Dashboard sends user preference (or None for ASHRAE auto) here.
   4. `POST /api/hostel/override` — Dashboard sends the operating mode (`AUTO`, `ON`, or `OFF`) here.
-* **Dual Hardware Link:** Works over **WiFi HTTP** (with automatic UDP discovery on port `5001` so the ESP32 finds the laptop IP automatically) and also listens on **USB Serial (`COM12`)** if the board is plugged into the laptop.
+* **Dual Hardware Link:** Works over **WiFi HTTP** (with automatic UDP discovery on port `5001` so the ESP32 finds the laptop IP automatically) and also listens on **USB Serial (`your COM port`)** if the board is plugged into the laptop.
 
 ### File 6: `dashboard.py` (The Live Streamlit Web Dashboard — Port 8501)
 **One job:** Display a clean, live web page using native Streamlit components (`st.metric`, `st.slider`, `st.radio`, `st.tabs`, `st.plotly_chart`, `st.table`):
-* **Tab 1 (`Hostel AC Unit`):** Target temperature slider (`16.0°C – 32.0°C`), operating mode selector (`Automatic`, `Manual Override ON`, `Manual Override OFF`), 4 live metric boxes refreshing every 2.5 seconds, and an auto-scaling Plotly graph refreshing every 6 seconds without page flicker.
-* **Tab 2 (`Overnight Run-Time Analytics`):** Interactive slider showing `% Run-Time Reduction` and `Degree-Hours Avoided`.
+* **Tab 1 (`Hostel AC Unit`):** Setpoint source ("ASHRAE Auto" / "My preference" slider `16.0°C – 32.0°C`), operating mode selector (`Automatic`, `Manual Override ON`, `Manual Override OFF`), 4 live metric boxes refreshing every 2.5 seconds, and an auto-scaling Plotly graph refreshing every 6 seconds without page flicker.
+* **Tab 2 (`Overnight Run-Time Analytics`):** Illustrative scenario slider showing `% Run-Time Reduction` and `Degree-Hours Avoided`.
 * **Tab 3 (`Sleep Biology & Weather`):** Live Katpadi weather and the ASHRAE 55 + sleep metabolism explanation.
 * **Tab 4 (`Telemetry Logs`):** Live CSV table + one-click CSV download button.
 * **Tab 5 (`Hardware & Architecture`):** Complete ₹813 Bill of Materials and First-Year Python syllabus mapping table.
@@ -139,13 +141,13 @@ We wrote the entire Python project using **only basic first-year Python** (`def`
 Split these 5 roles among your team so everyone has a clear 45-second explanation ready:
 
 ### Speaker 1: Problem Statement & Comfort Math (`comfort_model.py`)
-> *"Our project solves overnight overcooling in hostel rooms, where ACs only have a binary ON/OFF wall switch and no thermostat. In `comfort_model.py`, I implemented the ASHRAE Standard 55 Adaptive Comfort formula (`17.8 + 0.31 * outdoor_temp`), a `+1.0°C` nighttime sleep offset for blanket insulation and lower sleep metabolism (`0.7 met`), and a `±1.5°C` hysteresis deadband so the servo motor only flips the switch when crossing the lower or upper comfort limits."*
+> *"Our project solves overnight overcooling in hostel rooms, where ACs only have a binary ON/OFF wall switch and no thermostat. In `comfort_model.py`, I implemented the ASHRAE Standard 55 Adaptive Comfort formula (`17.8 + 0.31 * outdoor_temp`), a `+1.0°C` nighttime sleep offset for blanket insulation and lower sleep metabolism (`0.7 met`), and a `±1.5°C` control deadband so the servo motor only flips the switch when crossing the lower or upper comfort limits."*
 
 ### Speaker 2: Live Weather Pipeline & Error Handling (`weather_service.py` & `config.py`)
-> *"I built `weather_service.py` and `config.py`. Using Python's `requests` library, our code fetches live outdoor temperature and humidity for Katpadi, Vellore from the local weather station API — matching Google Weather. Because outdoor weather changes slowly, we cache the reading in memory for 5 minutes so the server responds in milliseconds. We also wrapped every network call in a `try/except` block so if the hotspot loses internet, it seamlessly uses backup values without crashing."*
+> *"I built `weather_service.py` and `config.py`. Using Python's `requests` library, our code fetches live outdoor temperature and humidity for Katpadi, Vellore from nearest-station/model data via wttr.in. Because outdoor weather changes slowly, we cache the reading in memory for 5 minutes so the server responds in milliseconds. We also wrapped every network call in a `try/except` block so if the hotspot loses internet, it seamlessly uses backup values without crashing."*
 
 ### Speaker 3: Overnight Run-Time Analytics (`comfort_model.py` & `dashboard.py`)
-> *"I worked on the thermal run-time analytics in `calculate_runtime_reduction()` and Tab 2 of the dashboard. Because hostel cooling comes from a centralized plant where chiller wattage isn't accessible to students, we don't guess fake kW numbers. Instead, we measure indoor temperature and time directly: turning the switch off for 4 out of 8 sleep hours cuts active cooling run-time by 50% and prevents 16 degree-hours of freezing overcooling overnight."*
+> *"I worked on the thermal run-time analytics in `calculate_runtime_reduction()` and Tab 2 of the dashboard. Because hostel cooling comes from a centralized plant where chiller wattage isn't accessible to students, we don't guess fake kW numbers. Instead, we illustrate potential run-time reduction: turning the switch off for 4 out of 8 sleep hours cuts active cooling run-time by 50% and prevents 16 degree-hours of freezing overcooling overnight."*
 
 ### Speaker 4: Hardware, ESP32-S3 Firmware & Flask Server (`app.py` & `hostel_ac_controller.ino`)
 > *"I integrated the physical ESP32-S3 hardware with our Flask server. The ESP32-S3 reads the DHT11 sensor on GPIO 4, drives the SG90 servo on GPIO 18 between 0 and 180 degrees, shows live status on the OLED on GPIO 8 and 9, and supports manual touch toggling on GPIO 10. It sends telemetry every 2.5 seconds over both WiFi HTTP and USB Serial. `app.py` receives this data, runs the comfort model, and replies with the servo command."*

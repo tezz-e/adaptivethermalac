@@ -41,14 +41,14 @@ The files you should read to understand the project:
      - **SG90 Micro Servo Motor (`GPIO 18`):** Mechanically pushes the AC switch (`0° = OFF`, `180° = ON`), powered by an external 5V adapter with shared GND.
      - **1.3" SH1106 I2C OLED (`SDA = GPIO 8`, `SCL = GPIO 9`):** Displays live room temp, target temp, `DHT:LIVE`, and `SRV:RDY`/`SRV:ON`.
   2. **Python Backend & Math (`comfort_model.py`, `weather_service.py`, `app.py`, `storage.py`):**
-     - Fetches live outdoor weather for **Katpadi, Vellore** (`wttr.in` station API, matching Google Weather, with `Open-Meteo` as fallback — cached for 5 minutes).
-     - Calculates the **ASHRAE Standard 55 Adaptive Comfort Model** (`Comfortable Temp = 17.8 + 0.31 * Outdoor Temp`) or uses the resident's **Preferred Target Temperature (`16.0°C – 32.0°C`)** from the dashboard slider.
+     - Fetches live outdoor weather for **Katpadi, Vellore** (`wttr.in`, with `Open-Meteo` as fallback — cached for 5 minutes).
+     - Calculates the **ASHRAE Standard 55 Adaptive Comfort Model** (`Comfortable Temp = 17.8 + 0.31 * Outdoor Temp`) or uses the resident's **Preferred Target Temperature (`16.0°C – 32.0°C`)** from the dashboard slider (defaults to ASHRAE Auto).
      - Adds a **`+1.0°C` nighttime sleep offset** (10 PM – 7 AM) because sleeping humans produce 30% less heat (`0.7 met`) and use blankets (`1.2–1.5 clo`).
-     - Uses **Hysteresis (`±1.5°C` deadband)** so the AC turns OFF at `min_temp`, turns ON at `max_temp`, and stays in its current state in between to prevent rapid switch clicking.
+     - Uses a **Control Deadband (`±1.5°C`)** so the AC turns OFF at `min_temp`, turns ON at `max_temp`, and stays in its current state in between to prevent rapid switch clicking.
      - Logs every reading to `data/hostel_telemetry.csv` using Python's `with open(...)` context manager and the `csv` module.
   3. **Live Web Dashboard (`dashboard.py` on Port 8501):**
      - Built with pure native Streamlit components (`st.metric`, `st.slider`, `st.radio`, `st.tabs`, `st.plotly_chart`).
-     - Shows live hardware readings, lets you set the target temperature (`16–32°C`) or manual override mode, and plots an auto-scaling temperature vs. comfort band trend graph using Plotly.
+     - Shows live hardware readings, lets you choose Setpoint Source ("ASHRAE Auto" / "My preference" slider `16–32°C`) or manual override mode, and plots an auto-scaling temperature vs. control deadband trend graph using Plotly.
      - Two `@st.fragment` sections refresh independently every 2.5s and 6s without flickering the whole page.
 
 ---

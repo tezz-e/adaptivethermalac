@@ -30,10 +30,17 @@ FLASK_PORT = 5000
 # ASHRAE Standard 55 Adaptive Comfort Equation Constants
 # Formula: Comfortable Indoor Temp = 17.8 + (0.31 x Outdoor Temp)
 # Example: If outdoor temp is 34°C  →  17.8 + (0.31 x 34) = 28.34°C target
-# Source: ASHRAE Standard 55-2020, Table 1 (mixed-mode buildings)
+# Source: ASHRAE 55 adaptive model for naturally conditioned spaces, simplified:
+# uses current outdoor temp instead of the prevailing mean outdoor temp
 # ---------------------------------------------------------------------------
 ASHRAE_INTERCEPT = 17.8   # The "base" indoor temp when outdoor temp is 0°C
 ASHRAE_SLOPE     = 0.31   # How much the target rises for each 1°C outdoor rise
+
+# ---------------------------------------------------------------------------
+# Control Deadband (Hysteresis)
+# Half-width around optimal temperature. Our design choice (prevents servo chatter).
+# ---------------------------------------------------------------------------
+COMFORT_BAND_HALF_WIDTH = 1.5   # ±1.5°C control deadband
 
 # ---------------------------------------------------------------------------
 # Overnight Sleep Mode Settings
@@ -56,15 +63,17 @@ SERVO_ON_ANGLE  = 180  # Servo angle that pushes AC switch to ON position (full 
 
 # ---------------------------------------------------------------------------
 # Default Resident Temperature Preference
-# This is the starting point shown in the dashboard slider.
-# The resident can drag the slider to any value between 16°C and 32°C.
+# None = use ASHRAE auto calculation by default.
+# If set to a float (e.g. 25.0), overrides ASHRAE with user preference.
 # ---------------------------------------------------------------------------
-DEFAULT_PREFERRED_TEMP = 25.0   # degrees Celsius
+DEFAULT_PREFERRED_TEMP = None   # None = use ASHRAE auto
 
 # ---------------------------------------------------------------------------
-# Overnight Sleep Duration (used in the run-time reduction calculation)
+# Overnight Sleep Duration & Overcooling Estimate (Illustrative Scenario)
+# Baseline assumes an on/off wall-switch AC would otherwise run all 8 hours.
 # ---------------------------------------------------------------------------
-OVERNIGHT_SLEEP_HOURS = 8.0     # hours per night
+OVERNIGHT_SLEEP_HOURS   = 8.0   # hours per night
+OVERCOOL_DEG_PER_HOUR   = 4.0   # estimated overcooling rate (°C per hour) without control
 
 # ---------------------------------------------------------------------------
 # CSV Log File Path (relative to the project root folder)

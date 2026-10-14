@@ -73,11 +73,12 @@ hostel_room_state = {
     "servo_status":    "READY",
     "touch_override":  False,     # True when the physical touch button was pressed
     "connection_mode": "STANDBY", # "WIFI_HTTP" or "USB_SERIAL (COM12)"
-    "preferred_temp":  config.DEFAULT_PREFERRED_TEMP,
+    "preferred_temp":  config.DEFAULT_PREFERRED_TEMP,  # None by default (ASHRAE auto)
     "ac_state":        "OFF",     # "ON" or "OFF" — what the servo is currently doing
     "servo_angle":     0,         # 0 = switch OFF, 180 = switch ON
     "manual_override": False,     # True when the dashboard radio button forced ON/OFF
     "override_state":  None,      # "ON", "OFF", or None (AUTO)
+    "last_reason":     "System initialized.", # last explanation for the decision
     "last_ping":       None       # timestamp string of the last received ESP32 reading
 }
 
@@ -134,8 +135,8 @@ def process_incoming_reading(room_temp, room_humidity, sensor_source="LIVE_DHT11
     # Step 2: What hour is it locally right now? (0–23)
     current_hour = time.localtime().tm_hour
 
-    # What is the resident's current preferred temperature?
-    preferred = hostel_room_state.get("preferred_temp", config.DEFAULT_PREFERRED_TEMP)
+    # What is the resident's current preferred temperature? (None = ASHRAE auto)
+    preferred = hostel_room_state.get("preferred_temp")
 
     # Calculate the full comfort band dict from comfort_model.py
     band = comfort_model.get_hostel_comfort_band(weather["temperature_c"], current_hour, preferred_temp=preferred)
@@ -177,6 +178,7 @@ def process_incoming_reading(room_temp, room_humidity, sensor_source="LIVE_DHT11
     hostel_room_state["connection_mode"] = str(connection_mode)
     hostel_room_state["ac_state"]        = ac_state
     hostel_room_state["servo_angle"]     = servo_angle
+    hostel_room_state["last_reason"]     = reason
     hostel_room_state["last_ping"]       = time.strftime("%Y-%m-%d %H:%M:%S")
 
     # Step 5: Write to CSV — but at most every 2.0 seconds to avoid duplicate rows.
@@ -413,13 +415,21 @@ def get_hostel_status():
 @app.route("/api/hostel/preference", methods=["POST"])
 def post_hostel_preference():
     """
-    Receives the resident's preferred temperature from the dashboard slider.
+    Receives the resident's preferred temperature from the dashboard slider,
+    or None/null to revert to ASHRAE weather-adaptive automatic control.
     Immediately re-evaluates the AC state so the servo responds right away.
     """
     data = request.get_json(force=True, silent=True) or {}
     try:
-        # Store the new preference (clamp is not needed here; slider enforces 16–32)
-        hostel_room_state["preferred_temp"] = round(float(data.get("preferred_temp", 25.0)), 1)
+        raw_pref = data.get("preferred_temp")
+        if raw_pref is None or str(raw_pref).strip().lower() in ("none", "null", ""):
+            # None = revert to ASHRAE auto calculation
+            hostel_room_state["preferred_temp"] = None
+        else:
+            # Clamp between 16.0°C and 32.0°C
+            num_val = float(raw_pref)
+            hostel_room_state["preferred_temp"] = round(max(16.0, min(32.0, num_val)), 1)
+
         hostel_room_state["touch_override"] = False   # a new preference clears touch override
 
         weather = weather_service.fetch_live_weather()
@@ -428,7 +438,7 @@ def post_hostel_preference():
         )
         # Re-evaluate AC only if not in manual override mode
         if not hostel_room_state["manual_override"]:
-            ac_state, servo_angle, _ = comfort_model.evaluate_hostel_ac_decision(
+            ac_state, servo_angle, reason = comfort_model.evaluate_hostel_ac_decision(
                 room_temp=hostel_room_state["current_temp"],
                 min_temp=band["min_temp"],
                 max_temp=band["max_temp"],
@@ -436,6 +446,7 @@ def post_hostel_preference():
             )
             hostel_room_state["ac_state"]    = ac_state
             hostel_room_state["servo_angle"] = servo_angle
+            hostel_room_state["last_reason"] = reason
 
         return jsonify({
             "status":        "success",
@@ -467,6 +478,7 @@ def post_hostel_override():
         hostel_room_state["override_state"]  = mode
         hostel_room_state["ac_state"]        = mode
         hostel_room_state["servo_angle"]     = config.SERVO_ON_ANGLE if mode == "ON" else config.SERVO_OFF_ANGLE
+        hostel_room_state["last_reason"]     = f"Manual override active ({mode})."
 
     else:
         # Return to AUTO: clear the manual override and re-evaluate
@@ -476,7 +488,7 @@ def post_hostel_override():
         band = comfort_model.get_hostel_comfort_band(
             weather["temperature_c"], time.localtime().tm_hour, preferred_temp=hostel_room_state["preferred_temp"]
         )
-        ac_state, servo_angle, _ = comfort_model.evaluate_hostel_ac_decision(
+        ac_state, servo_angle, reason = comfort_model.evaluate_hostel_ac_decision(
             room_temp=hostel_room_state["current_temp"],
             min_temp=band["min_temp"],
             max_temp=band["max_temp"],
@@ -484,6 +496,7 @@ def post_hostel_override():
         )
         hostel_room_state["ac_state"]    = ac_state
         hostel_room_state["servo_angle"] = servo_angle
+        hostel_room_state["last_reason"] = reason
 
     return jsonify({
         "status":          "success",

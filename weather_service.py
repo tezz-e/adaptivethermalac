@@ -4,8 +4,7 @@ weather_service.py
 Fetches real-time outdoor temperature and humidity for Katpadi, Vellore.
 
 How it works:
-    1. We call a free weather API (wttr.in) and ask for current conditions
-       at "Katpadi, Vellore" — the same data Google Weather uses locally.
+    1. We fetch nearest-station/model data from wttr.in for "Katpadi, Vellore".
     2. If that API fails (no internet on the hotspot), we try a second API
        (Open-Meteo) using GPS coordinates.
     3. If both fail, we return a safe offline backup value (34°C).
@@ -36,7 +35,7 @@ def fetch_live_weather(force_refresh=False):
         {
             "temperature_c": 34.1,
             "humidity_pct": 42.0,
-            "source": "Katpadi Weather Station (Live API)"
+            "source": "wttr.in (live)"
         }
 
     Parameters:
@@ -58,8 +57,7 @@ def fetch_live_weather(force_refresh=False):
         return cached_weather
 
     # -----------------------------------------------------------------------
-    # Attempt 1: wttr.in local weather station for Katpadi, Vellore
-    # This matches what Google Weather shows for our campus location.
+    # Attempt 1: nearest-station/model data from wttr.in for Katpadi, Vellore
     # requests.get() sends an HTTP GET request (like opening a URL in a browser)
     # timeout=4 means "give up after 4 seconds if the server doesn't respond"
     # -----------------------------------------------------------------------
@@ -70,12 +68,12 @@ def fetch_live_weather(force_refresh=False):
             cached_weather = {
                 "temperature_c": round(float(current_cond["temp_C"]), 1),
                 "humidity_pct":  round(float(current_cond["humidity"]), 1),
-                "source": "Katpadi Weather Station (Live API)"
+                "source": "wttr.in (live)"
             }
             last_fetch_timestamp = current_time   # record when this successful fetch happened
             return cached_weather
-    except Exception:
-        pass   # if anything went wrong (no internet, timeout, etc.), try the next source
+    except Exception as error:
+        print(f"[Weather] source failed: {error}")   # print error so failures are not silent
 
     # -----------------------------------------------------------------------
     # Attempt 2: Open-Meteo coordinate-based grid API (fallback)
@@ -98,8 +96,8 @@ def fetch_live_weather(force_refresh=False):
             }
             last_fetch_timestamp = current_time
             return cached_weather
-    except Exception:
-        pass   # both APIs failed — fall through to the offline backup
+    except Exception as error:
+        print(f"[Weather] source failed: {error}")   # print error so failures are not silent
 
     # -----------------------------------------------------------------------
     # Attempt 3: Offline backup

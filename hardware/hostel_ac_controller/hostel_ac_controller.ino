@@ -66,8 +66,8 @@
 // --------------------------------------------------------------------------------------
 
 // WiFi Credentials (Hotspot)
-const char* WIFI_SSID     = "eeeeee";
-const char* WIFI_PASSWORD = "vv202526";
+const char* WIFI_SSID     = "YOUR_WIFI_SSID";
+const char* WIFI_PASSWORD = "YOUR_WIFI_PASSWORD";
 
 // Flask Backend API URL (Laptop local IPv4 on the hotspot + UDP auto-discovery)
 String serverUrl          = "http://10.93.146.96:5000/api/hostel/telemetry";

@@ -46,3 +46,5 @@ Desktop.ini
 # PlatformIO build artifacts
 .pio/
 
+# Antigravity agent tools and skills (local development only)
+.agents/

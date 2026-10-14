@@ -39,14 +39,12 @@ def calculate_ashrae_comfort(outdoor_temp):
 
         Comfortable Temp = 17.8 + (0.31 x Outdoor Temp)
 
-    Example: Outdoor = 34°C  -->  17.8 + (0.31 x 34) = 28.34°C
+    Example: Outdoor = 34°C  -->  17.8 + (0.31 x 33.5 clamped) = 28.19°C
 
     Why "clamped_temp"?
-        ASHRAE only studied buildings with outdoor temps between 10°C and 35°C.
-        If outdoor temp is outside that range (e.g., 5°C or 40°C), the formula
-        gives unreliable results. We clamp (clip) it to the studied range using
-        min() and max() together: max(10, min(35, value)) is a Python idiom
-        that forces a value to stay inside [10, 35].
+        ASHRAE Standard 55 defines the adaptive model for outdoor temperatures
+        between 10.0°C and 33.5°C. If outdoor temp is outside that range, the
+        formula gives unreliable results. We clamp (clip) it to [10.0, 33.5].
 
     Parameters:
         outdoor_temp (float): Current outdoor temperature in Celsius.
@@ -54,8 +52,8 @@ def calculate_ashrae_comfort(outdoor_temp):
     Returns:
         float: Recommended indoor temperature, rounded to 2 decimal places.
     """
-    # Clamp outdoor_temp to the valid ASHRAE study range of 10°C – 35°C
-    clamped_temp = max(10.0, min(35.0, outdoor_temp))
+    # Clamp outdoor_temp to the valid ASHRAE study range of 10.0°C – 33.5°C
+    clamped_temp = max(10.0, min(33.5, outdoor_temp))
 
     # Apply the linear equation using constants from config.py
     comfortable_temp = config.ASHRAE_INTERCEPT + (config.ASHRAE_SLOPE * clamped_temp)
@@ -64,7 +62,7 @@ def calculate_ashrae_comfort(outdoor_temp):
 
 
 # ---------------------------------------------------------------------------
-# FUNCTION 2: Full comfort band (target + ±1.5°C deadband + night offset)
+# FUNCTION 2: Full comfort band (target + control deadband + night offset)
 # ---------------------------------------------------------------------------
 
 def get_hostel_comfort_band(outdoor_temp, current_hour, preferred_temp=None):
@@ -73,21 +71,21 @@ def get_hostel_comfort_band(outdoor_temp, current_hour, preferred_temp=None):
 
     Two modes:
         - If the resident has set a preferred temp (via the slider), we use that.
-        - Otherwise we calculate the ASHRAE adaptive target from outdoor weather.
+        - Otherwise (preferred_temp is None) we calculate the ASHRAE adaptive target from outdoor weather.
 
     Night mode (22:00 – 07:00):
         Adds +1.0°C to the target because sleeping humans produce less body heat
         and are insulated by blankets, so they are comfortable at a slightly
         warmer room temperature.
 
-    The ±1.5°C deadband (comfort band):
-        Instead of targeting exactly 25.0°C, we accept the range 23.5 – 26.5°C.
+    Control deadband (our design choice, prevents servo chatter):
+        Instead of targeting an exact degree, we apply ±COMFORT_BAND_HALF_WIDTH (°C).
         This prevents the servo from toggling rapidly on tiny 0.1°C DHT11 noise.
 
     Parameters:
         outdoor_temp   (float): Current outdoor temperature in Celsius.
         current_hour   (int):   Current hour of day (0-23), from time.localtime().
-        preferred_temp (float): Resident's slider preference, or None for ASHRAE auto.
+        preferred_temp (float or None): Resident's slider preference, or None for ASHRAE auto.
 
     Returns:
         dict with keys: optimal_temp, min_temp, max_temp, is_night_mode,
@@ -112,9 +110,9 @@ def get_hostel_comfort_band(outdoor_temp, current_hour, preferred_temp=None):
         optimal_temp = round(base_target, 2)
         reason = f"{profile_source} daytime profile."
 
-    # Comfort band: ±1.5°C around the target
-    min_temp = round(optimal_temp - 1.5, 2)
-    max_temp = round(optimal_temp + 1.5, 2)
+    # Control deadband around the target (our design choice to prevent servo chatter)
+    min_temp = round(optimal_temp - config.COMFORT_BAND_HALF_WIDTH, 2)
+    max_temp = round(optimal_temp + config.COMFORT_BAND_HALF_WIDTH, 2)
 
     # Return everything as a dict so callers can access values by name, not by index
     return {
@@ -187,17 +185,18 @@ def evaluate_hostel_ac_decision(room_temp, min_temp, max_temp, last_ac_state="OF
 
 def calculate_runtime_reduction(hours_ac_off=4.0, total_sleep_hours=config.OVERNIGHT_SLEEP_HOURS):
     """
-    Calculates how much active cooling time was avoided overnight by using the
-    adaptive comfort system (which turns the AC off when the room is already cool).
+    Illustrative scenario: calculates estimated run-time reduction and avoided
+    overcooling overnight. This is not measured data; it illustrates the potential
+    reduction assuming an on/off wall-switch AC would otherwise run all night.
+    No energy (kWh) is claimed.
 
     Example:
         If the AC was off for 4 hours out of an 8-hour sleep period:
             Run-time reduction = (4 / 8) * 100 = 50%
             Degree-hours avoided = 4 hours * 4.0°C/hr = 16.0 °C·hr
 
-    The "degree-hours avoided" is a measure of overcooling prevented:
-        It assumes the AC would have overcooled the room by ~4°C during that time.
-        This is a rough estimate used to illustrate energy savings for the viva.
+    The "degree-hours avoided" is an illustrative measure of overcooling prevented:
+        It assumes an uncontrolled AC would overcool the room by ~4°C/hr during that time.
 
     Parameters:
         hours_ac_off      (float): How many hours the AC was switched off overnight.
@@ -214,8 +213,8 @@ def calculate_runtime_reduction(hours_ac_off=4.0, total_sleep_hours=config.OVERN
     # Percentage of the sleep window where AC was off
     reduction_pct = round((clamped_hours / total_sleep_hours) * 100, 1)
 
-    # Degree-hours: rough estimate of overcooling avoided (4°C * hours off)
-    degree_hours_avoided = round(clamped_hours * 4.0, 1)
+    # Degree-hours: illustrative estimate of overcooling avoided
+    degree_hours_avoided = round(clamped_hours * config.OVERCOOL_DEG_PER_HOUR, 1)
 
     return {
         "hours_cooling_off":    clamped_hours,

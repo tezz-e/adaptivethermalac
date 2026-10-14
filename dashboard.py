@@ -152,35 +152,61 @@ with tab_hostel:
     ctrl_col1, ctrl_col2 = st.columns([1.2, 1.8])
 
     with ctrl_col1:
-        # st.slider returns the current value the user has dragged to.
-        # We read preferred_temp from session_state and clamp it to the valid range
-        # so the slider does not crash if an old out-of-range value was stored.
-        current_pref  = float(hostel_room.get("preferred_temp", config.DEFAULT_PREFERRED_TEMP))
-        selected_pref = st.slider(
-            "Preferred Target Temperature (°C)",
-            min_value=16.0,
-            max_value=32.0,
-            value=max(16.0, min(32.0, current_pref)),
-            step=0.5
+        # Select whether to follow ASHRAE weather-adaptive model or user preference
+        current_pref_val = hostel_room.get("preferred_temp")
+        setpoint_source_default = "ASHRAE Auto" if current_pref_val is None else "My preference"
+
+        setpoint_source = st.radio(
+            "Setpoint source",
+            options=["ASHRAE Auto", "My preference"],
+            index=0 if setpoint_source_default == "ASHRAE Auto" else 1,
+            horizontal=True
         )
 
-        # Only POST to Flask when the slider actually changed (not on every re-run).
-        # st.session_state["last_synced_pref"] stores the last value we sent.
-        if st.session_state.get("last_synced_pref") != selected_pref:
-            hostel_room["preferred_temp"] = selected_pref
-            try:
-                r = requests.post(
-                    f"http://127.0.0.1:{config.FLASK_PORT}/api/hostel/preference",
-                    json={"preferred_temp": selected_pref},
-                    timeout=0.4
-                )
-                if r.status_code == 200:
-                    res_data = r.json()
-                    hostel_room["ac_state"]    = res_data.get("ac_state",    hostel_room["ac_state"])
-                    hostel_room["servo_angle"] = res_data.get("servo_angle", hostel_room["servo_angle"])
-                    st.session_state["last_synced_pref"] = selected_pref
-            except Exception:
-                pass   # Flask not reachable — update local dict only, sync when available
+        if setpoint_source == "My preference":
+            # Float default (fallback to 25.0 if current_pref_val was None)
+            slider_default = float(current_pref_val) if current_pref_val is not None else 25.0
+            selected_pref = st.slider(
+                "Preferred Target Temperature (°C)",
+                min_value=16.0,
+                max_value=32.0,
+                value=max(16.0, min(32.0, slider_default)),
+                step=0.5
+            )
+            # Sync to Flask if preference value changed
+            if st.session_state.get("last_synced_pref") != selected_pref:
+                hostel_room["preferred_temp"] = selected_pref
+                try:
+                    r = requests.post(
+                        f"http://127.0.0.1:{config.FLASK_PORT}/api/hostel/preference",
+                        json={"preferred_temp": selected_pref},
+                        timeout=0.4
+                    )
+                    if r.status_code == 200:
+                        res_data = r.json()
+                        hostel_room["ac_state"]    = res_data.get("ac_state",    hostel_room["ac_state"])
+                        hostel_room["servo_angle"] = res_data.get("servo_angle", hostel_room["servo_angle"])
+                        st.session_state["last_synced_pref"] = selected_pref
+                except Exception:
+                    pass
+        else:
+            # ASHRAE Auto: clear preference by posting null
+            st.caption("Using ASHRAE Standard 55 outdoor-adaptive comfort calculation.")
+            if st.session_state.get("last_synced_pref") is not None:
+                hostel_room["preferred_temp"] = None
+                try:
+                    r = requests.post(
+                        f"http://127.0.0.1:{config.FLASK_PORT}/api/hostel/preference",
+                        json={"preferred_temp": None},
+                        timeout=0.4
+                    )
+                    if r.status_code == 200:
+                        res_data = r.json()
+                        hostel_room["ac_state"]    = res_data.get("ac_state",    hostel_room["ac_state"])
+                        hostel_room["servo_angle"] = res_data.get("servo_angle", hostel_room["servo_angle"])
+                        st.session_state["last_synced_pref"] = None
+                except Exception:
+                    pass
 
     with ctrl_col2:
         mode_options = ["Automatic (ASHRAE)", "Manual Override ON (180°)", "Manual Override OFF (0°)"]
@@ -241,7 +267,7 @@ with tab_hostel:
         live_band = comfort_model.get_hostel_comfort_band(
             live_weather["temperature_c"],
             time.localtime().tm_hour,
-            preferred_temp=hostel_room["preferred_temp"]
+            preferred_temp=hostel_room.get("preferred_temp")
         )
 
         # Four equal columns — one metric card each
@@ -253,9 +279,16 @@ with tab_hostel:
         c1.metric("Room Temperature", f"{hostel_room['current_temp']:.1f} °C")
         c1.caption(f"Humidity: {hostel_room['current_humidity']:.0f}% | {sensor_label}")
 
-        mode_label = "Touch Override (GPIO 10)" if hostel_room.get("touch_override") else (
-            "Manual Override" if hostel_room.get("manual_override") else "ASHRAE Auto"
-        )
+        # Show "ASHRAE Auto" only when preferred_temp is None, otherwise "Resident Preference"
+        if hostel_room.get("touch_override"):
+            mode_label = "Touch Override (GPIO 10)"
+        elif hostel_room.get("manual_override"):
+            mode_label = "Manual Override"
+        elif hostel_room.get("preferred_temp") is None:
+            mode_label = "ASHRAE Auto"
+        else:
+            mode_label = "Resident Preference"
+
         c2.metric("AC Switch State", hostel_room["ac_state"])
         c2.caption(f"Source: {mode_label}")
 
@@ -264,15 +297,17 @@ with tab_hostel:
         c3.caption(f"Switch ON ({config.SERVO_ON_ANGLE}°)" if angle == config.SERVO_ON_ANGLE else f"Switch OFF ({config.SERVO_OFF_ANGLE}°)")
 
         c4.metric("Target Setpoint", f"{live_band['optimal_temp']:.1f} °C")
-        c4.caption(f"Band: {live_band['min_temp']:.1f} – {live_band['max_temp']:.1f} °C")
+        c4.caption(f"Deadband: {live_band['min_temp']:.1f} – {live_band['max_temp']:.1f} °C")
 
-        # Re-run the decision function just to get the explanation text (no side effects)
-        _, _, explanation = comfort_model.evaluate_hostel_ac_decision(
-            hostel_room["current_temp"],
-            live_band["min_temp"],
-            live_band["max_temp"],
-            hostel_room["ac_state"]
-        )
+        # Use the actual explanation from backend if available
+        explanation = hostel_room.get("last_reason")
+        if not explanation:
+            _, _, explanation = comfort_model.evaluate_hostel_ac_decision(
+                hostel_room["current_temp"],
+                live_band["min_temp"],
+                live_band["max_temp"],
+                hostel_room["ac_state"]
+            )
         conn = hostel_room.get("connection_mode", "STANDBY")
         ping = hostel_room.get("last_ping") or "Waiting for ESP32..."
         st.caption(f"**Decision:** {explanation}  |  **Link:** {conn}  |  **Last Sync:** {ping}")
@@ -408,8 +443,8 @@ with tab_hostel:
             fig.add_trace(go.Scatter(
                 x=x_vals, y=plot_df["comfort_min"],
                 mode="lines", line=dict(width=0), fill="tonexty",
-                fillcolor="rgba(34, 197, 94, 0.16)", name="Comfort Band (±1.5°C)",
-                hovertemplate="<b>Comfort Band:</b> %{y:.1f} °C<extra></extra>"
+                fillcolor="rgba(34, 197, 94, 0.16)", name="Control Deadband",
+                hovertemplate="<b>Control Deadband:</b> %{y:.1f} °C<extra></extra>"
             ))
 
             # Trace 3: Dashed green line for the ASHRAE optimal target setpoint
@@ -476,21 +511,18 @@ with tab_hostel:
 with tab_savings:
     st.markdown("#### Active Run-Time & Overcooling Prevention")
     st.caption(
-        "Hostel rooms use a binary wall switch connected to centralized cooling. "
-        "Instead of guessing chiller tonnage, we directly measure indoor temperature and hours turned off overnight."
+        "Illustrative scenario: hours AC off overnight (not measured data). "
+        "The baseline assumes an on/off wall-switch AC would otherwise run all 8 hours. "
+        "No energy (kWh) is claimed."
     )
 
-    # The slider returns a float (e.g., 4.0). We pass it straight into comfort_model.
-    hours_slider  = st.slider("Hours AC Switched Off Overnight (out of 8.0 hrs sleep)", 1.0, 7.0, 4.0, 0.5)
+    # Illustrative scenario slider
+    hours_slider  = st.slider("Illustrative scenario: hours AC off overnight (not measured data)", 1.0, 7.0, 4.0, 0.5)
     runtime_stats = comfort_model.calculate_runtime_reduction(hours_ac_off=hours_slider)
 
-    s1, s2, s3 = st.columns(3)
+    s1, s2 = st.columns(2)
     s1.metric("Run-Time Reduction",   f"{runtime_stats['runtime_reduction_pct']}%", f"{runtime_stats['hours_cooling_off']} hrs off")
-    s2.metric("Degree-Hours Avoided", f"{runtime_stats['degree_hours_avoided']} °C·hr", "Overcooling prevented")
-
-    # Comfort adherence: a rough estimate based on how much time the AC was off
-    comfort_adherence = round(min(98.0, 85.0 + (runtime_stats["runtime_reduction_pct"] * 0.1)), 1)
-    s3.metric("Comfort Adherence",    f"~{comfort_adherence}%", "Hours inside ASHRAE band")
+    s2.metric("Degree-Hours Avoided", f"{runtime_stats['degree_hours_avoided']} °C·hr", "Illustrative overcooling prevented")
 
 # ======================================================================================
 # TAB 3: SLEEP BIOLOGY AND WEATHER
@@ -507,11 +539,12 @@ with tab_science:
         """
         **ASHRAE 55 Adaptive Comfort Equation:**
         `Comfortable Indoor Temp = 17.8 + (0.31 × Outdoor Temp)`
+        *(Simplified adaptive model using current outdoor temp instead of prevailing mean)*
 
         **Why Overnight Sleep Mode Adds `+1.0 °C` (22:00 – 07:00):**
         1. **Metabolic Rate Drops:** Human heat production drops from `1.0 met` (awake) to `0.7 met` (sleeping).
         2. **Blanket Insulation:** Bedding increases thermal insulation from `0.5 clo` to `1.2 – 1.5 clo`.
-        3. **Hysteresis Deadband (`±1.5 °C`):** Prevents the SG90 servo and AC switch from chattering on small `0.1 °C` fluctuations.
+        3. **Control Deadband (`±1.5 °C`):** Our engineering design choice to prevent the SG90 servo and AC switch from chattering on small sensor fluctuations.
         """
     )
 
