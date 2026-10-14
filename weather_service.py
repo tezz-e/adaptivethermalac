@@ -108,6 +108,7 @@ def fetch_live_weather(force_refresh=False):
     # and cache it for 5 minutes so repeated failures don't stall the demo.
     # -----------------------------------------------------------------------
     if cached_weather is not None:
+        last_fetch_timestamp = current_time   # refresh timestamp so stale cache is kept for 5 min without re-hitting failed APIs
         return cached_weather
     cached_weather = {
         "temperature_c": 34.0,
