@@ -104,12 +104,15 @@ def fetch_live_weather(force_refresh=False):
     # If we still have a stale cached value from a previous successful fetch,
     # return it rather than a hardcoded number.
     # If this is the very first run and we have never fetched anything, return
-    # a hardcoded offline backup (34°C is the typical Katpadi summer average).
+    # a hardcoded offline backup (34°C is the typical Katpadi summer average)
+    # and cache it for 5 minutes so repeated failures don't stall the demo.
     # -----------------------------------------------------------------------
     if cached_weather is not None:
         return cached_weather
-    return {
+    cached_weather = {
         "temperature_c": 34.0,
         "humidity_pct":  45.0,
         "source": "Katpadi Offline Backup"
     }
+    last_fetch_timestamp = current_time
+    return cached_weather

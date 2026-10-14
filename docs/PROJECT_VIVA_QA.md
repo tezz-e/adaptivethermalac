@@ -69,12 +69,12 @@ This was a deliberate engineering decision based on what can actually be measure
    Comfortable Indoor Temp = 17.8 + (0.31 * Outdoor Temp)
    ```
    **Example Values:**
-   | Outdoor Temp (°C) | ASHRAE Optimal Target (°C) | ±1.5°C Comfort Band (°C) |
+   | Outdoor Temp (°C) | ASHRAE Optimal Target (°C) | ±1.5°C Control Deadband (°C) |
    | :---: | :---: | :---: |
    | `20.0°C` | `24.0°C` | `22.5°C – 25.5°C` |
    | `25.0°C` | `25.6°C` | `24.1°C – 27.1°C` |
    | `30.0°C` | `27.1°C` | `25.6°C – 28.6°C` |
-   | `34.0°C` (Katpadi) | `28.3°C` | `26.8°C – 29.8°C` |
+   | `34.0°C` (Katpadi) | `28.2°C` (clamped) | `26.7°C – 29.7°C` |
 
 ---
 

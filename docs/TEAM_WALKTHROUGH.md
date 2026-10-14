@@ -49,7 +49,7 @@ Think of our hardware box like a tiny robot assistant sitting next to the wall s
   Comfortable Indoor Temp = 17.8 + (0.31 * Outdoor Temp)
   ```
 
-  For example, when Katpadi is **34.0°C** outside, the formula gives `17.8 + (0.31 * 34.0) = 28.3°C` as the natural baseline, or residents can slide their own **Preferred Target Temperature (`16.0°C to 32.0°C`)** on the dashboard.
+  For example, when Katpadi is **34.0°C** outside, the formula gives `17.8 + (0.31 * 33.5 clamped) = 28.2°C` as the natural baseline, or residents can slide their own **Preferred Target Temperature (`16.0°C to 32.0°C`)** on the dashboard.
 
 * **Why do we add `+1.0°C` at night (10:00 PM – 7:00 AM)?**  
   When you sleep, your body's heat production (metabolic rate) drops by 30% (from `1.0 met` awake to `0.7 met` sleeping), and you sleep under a blanket (`1.2 to 1.5 clo` insulation). Adding `+1.0°C` overnight prevents you from waking up freezing.

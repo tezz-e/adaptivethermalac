@@ -29,7 +29,7 @@ FLASK_PORT = 5000
 # ---------------------------------------------------------------------------
 # ASHRAE Standard 55 Adaptive Comfort Equation Constants
 # Formula: Comfortable Indoor Temp = 17.8 + (0.31 x Outdoor Temp)
-# Example: If outdoor temp is 34°C  →  17.8 + (0.31 x 34) = 28.34°C target
+# Example: If outdoor temp is 34°C  →  17.8 + (0.31 x 33.5 clamped) = 28.19°C target
 # Source: ASHRAE 55 adaptive model for naturally conditioned spaces, simplified:
 # uses current outdoor temp instead of the prevailing mean outdoor temp
 # ---------------------------------------------------------------------------
