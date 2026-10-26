@@ -1,8 +1,8 @@
 # Project Review & Viva Q&A Guide
 ### Adaptive Thermal Comfort AC Controller for Campus Hostels
 
-**Target Audience:** Teammates preparing for examiner questions during tomorrow's project review.  
-All answers are written in **simple, direct English** with **no broken math symbols or confusing diagram code**.
+**Target Audience:** Comprehensive technical architecture, design rationale, and project defense reference for faculty and examiners.  
+All answers are written in **clear, technical English** with complete mathematical derivations and syllabus mappings.
 
 ---
 
@@ -17,7 +17,7 @@ Our course focuses on mastering foundational Python concepts first:
 * **Tuples (`()`):** Used to return multiple values cleanly from a function, such as `(ac_state, servo_angle, reason)`.
 * **Lists (`[]`):** Used for CSV row headers and history tables.
 
-Using simple functions and dictionaries makes the data flow completely transparent and easy for every teammate to trace without unnecessary class boilerplate (`__init__`, `self`, inheritance).
+Using simple functions and dictionaries makes the data flow completely transparent and easy to trace and debug without unnecessary class boilerplate (`__init__`, `self`, inheritance).
 
 **How Data Flows Through Our Python Functions:**
 1. **`weather_service.fetch_live_weather()`** → Returns a dictionary with Katpadi's outdoor temperature (`34.0°C`) and humidity.

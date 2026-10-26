@@ -6,18 +6,10 @@
 
 ---
 
-## Teammates: Start Here! (15-Minute Prep Guide)
+## Documentation & Review Reference
 
-If you are opening this repository before tomorrow's review, **don't panic!** The entire Python codebase has been stripped down to **simple, beginner-friendly functions and dictionaries** (zero classes, zero OOP, zero complicated HTML/CSS), and every file has plain-English `#` comments explaining each step.
-
-Follow these 3 steps to get ready in 15 minutes:
-
-1. **Read the Plain-English Walkthrough (8 mins):**  
-   Open [**docs/TEAM_WALKTHROUGH.md**](docs/TEAM_WALKTHROUGH.md). It explains the real-world problem, why we focus on hostel switches instead of classrooms, what every single Python file and hardware pin does in plain English, and gives you exact **word-for-word speaking scripts** for the viva.
-2. **Practice with Your 1-on-1 AI Mentor (5 mins):**  
-   Open [**docs/AI_ONBOARDING_PROMPT.md**](docs/AI_ONBOARDING_PROMPT.md). Copy and paste that prompt into ChatGPT, Claude, or Gemini — it has the direct link to this GitHub repository and will explain your part of the code line-by-line and quiz you with 3 easy mock viva questions.
-3. **Skim the Examiner Q&A Sheet (2 mins):**  
-   Open [**docs/PROJECT_VIVA_QA.md**](docs/PROJECT_VIVA_QA.md) for quick, simple answers to the 12 most common professor questions.
+- **[Project Review & Viva Q&A Guide](docs/PROJECT_VIVA_QA.md):** Comprehensive technical justifications, ASHRAE mathematical derivations, architecture choices, syllabus alignment, and examiner questions.
+- **[Hardware Wiring & Pinout Guide](hardware/WIRING_GUIDE.md):** Complete hardware pinout diagram, GPIO allocations, and power isolation notes for the microcontroller, sensors, and servo actuator.
 
 ---
 
